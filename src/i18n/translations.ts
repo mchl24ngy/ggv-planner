@@ -199,7 +199,9 @@ export const translations = {
     tableSubsidy: '- Mieterstromzuschlag',
     tableFeedIn: '- Einspeisung',
     tableOpex: 'Betriebskosten (OPEX)',
-    tableAnnuity: 'Annuität',
+    tableAnnuity: 'Annuität (Gesamt)',
+    tableInterest: '- Zinsen',
+    tablePrincipal: '- Tilgung',
     tableCashflow: 'Cashflow vor Steuern',
 
     // Tooltip model hint
@@ -422,7 +424,9 @@ export const translations = {
     tableSubsidy: '- Tenant Elec. Subsidy',
     tableFeedIn: '- Feed-in Revenue',
     tableOpex: 'Operating Costs (OPEX)',
-    tableAnnuity: 'Loan Installment',
+    tableAnnuity: 'Loan Installment (Total)',
+    tableInterest: '- Interest',
+    tablePrincipal: '- Principal Repayment',
     tableCashflow: 'Pre-tax Cashflow',
 
     // Tooltip model hint

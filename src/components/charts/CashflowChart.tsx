@@ -74,15 +74,20 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
               <Cell key={idx} fill="#94a3b8" fillOpacity={opacity(idx)} />
             ))}
           </Bar>
+          <Bar dataKey="interestPaid" name="Zinsen" stackId="costs" fill="#64748b">
+            {data.map((_, idx) => (
+              <Cell key={idx} fill="#64748b" fillOpacity={opacity(idx)} />
+            ))}
+          </Bar>
           <Bar
-            dataKey="loanInstallment"
-            name="Annuität"
+            dataKey="principalPaid"
+            name="Tilgung"
             stackId="costs"
-            fill="#64748b"
+            fill="#334155"
             radius={[4, 4, 0, 0]}
           >
             {data.map((_, idx) => (
-              <Cell key={idx} fill="#64748b" fillOpacity={opacity(idx)} />
+              <Cell key={idx} fill="#334155" fillOpacity={opacity(idx)} />
             ))}
           </Bar>
         </BarChart>

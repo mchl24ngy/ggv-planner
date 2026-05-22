@@ -1145,6 +1145,33 @@ export const Configurator: React.FC = () => {
                                   ]?.loanInstallment.toFixed(2)}
                                 </td>
                               </tr>
+                              {(ecoResults.cashflowPlan[selectedYearIndex]?.loanInstallment ?? 0) >
+                                0 && (
+                                <>
+                                  <tr className="border-b border-slate-100 bg-slate-50/50">
+                                    <td className="px-4 py-1.5 pl-8 text-slate-500 text-xs">
+                                      {t.tableInterest}
+                                    </td>
+                                    <td className="px-4 py-1.5 text-right text-slate-500 text-xs">
+                                      -
+                                      {ecoResults.cashflowPlan[
+                                        selectedYearIndex
+                                      ]?.interestPaid.toFixed(2)}
+                                    </td>
+                                  </tr>
+                                  <tr className="border-b border-slate-100 bg-slate-50/50">
+                                    <td className="px-4 py-1.5 pl-8 text-slate-500 text-xs">
+                                      {t.tablePrincipal}
+                                    </td>
+                                    <td className="px-4 py-1.5 text-right text-slate-500 text-xs">
+                                      -
+                                      {ecoResults.cashflowPlan[
+                                        selectedYearIndex
+                                      ]?.principalPaid.toFixed(2)}
+                                    </td>
+                                  </tr>
+                                </>
+                              )}
                               <tr className="bg-blue-50">
                                 <td className="px-4 py-3 font-semibold text-slate-800">
                                   {t.tableCashflow}
