@@ -83,3 +83,15 @@ export interface EconomicResults {
   roi: number; // Return on Investment in %
   cashflowPlan: YearlyCashflow[];
 }
+
+export interface MonthlyEnergyFlow {
+  month: number; // Monatsnummer 1–12
+  daysInMonth: number; // Tage des Monats
+  pvYieldKwh: number; // Monatlicher PV-Ertrag aus PVGIS (kWh)
+  dailyPvKwh: number; // Durchschnittlicher täglicher PV-Ertrag (kWh/Tag)
+  dailyNeedKwh: number; // Täglicher Energiebedarf (konstant, kWh/Tag)
+  selfConsumptionKwh: number; // Direkt selbst verbrauchter PV-Strom (kWh/Monat)
+  batteryChargeKwh: number; // In den Speicher geladene Energie (kWh/Monat)
+  gridExportKwh: number; // Ins Netz eingespeiste Energie (kWh/Monat)
+  gridSupplyKwh: number; // Aus dem Netz bezogene Energie (kWh/Monat)
+}

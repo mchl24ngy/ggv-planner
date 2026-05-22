@@ -10,6 +10,7 @@ import {
   ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
+import { useLanguage } from '../../i18n/useLanguage';
 
 interface TenantSavingsChartProps {
   consumptionPerApartmentKwh: number;
@@ -22,21 +23,22 @@ export const TenantSavingsChart: React.FC<TenantSavingsChartProps> = ({
   gridElectricityRate,
   tenantElectricityRate,
 }) => {
+  const { t } = useLanguage();
   const savingsPerKwh = (gridElectricityRate - tenantElectricityRate) / 100;
 
   const scenarios = [
     {
-      label: '-50%',
+      label: t.scenarioMinus50,
       consumptionKwh: consumptionPerApartmentKwh * 0.5,
       savings: savingsPerKwh * consumptionPerApartmentKwh * 0.5,
     },
     {
-      label: 'Basis',
+      label: t.scenarioBase,
       consumptionKwh: consumptionPerApartmentKwh,
       savings: savingsPerKwh * consumptionPerApartmentKwh,
     },
     {
-      label: '+50%',
+      label: t.scenarioPlus50,
       consumptionKwh: consumptionPerApartmentKwh * 1.5,
       savings: savingsPerKwh * consumptionPerApartmentKwh * 1.5,
     },
@@ -60,7 +62,7 @@ export const TenantSavingsChart: React.FC<TenantSavingsChartProps> = ({
               props: { payload?: { consumptionKwh?: number } }
             ) => {
               const kwh = props.payload?.consumptionKwh ?? 0;
-              return [`${value.toFixed(2)} € (${kwh.toFixed(0)} kWh/WE)`, 'Ersparnis p.a.'];
+              return [`${value.toFixed(2)} € (${kwh.toFixed(0)} kWh/WE)`, t.tenantSavingsTooltip];
             }}
             contentStyle={{
               borderRadius: '12px',
@@ -69,7 +71,7 @@ export const TenantSavingsChart: React.FC<TenantSavingsChartProps> = ({
             }}
           />
           <ReferenceLine y={0} stroke="#475569" strokeWidth={1.5} />
-          <Bar dataKey="savings" name="Ersparnis p.a." radius={[4, 4, 0, 0]}>
+          <Bar dataKey="savings" name={t.tenantSavingsLabel} radius={[4, 4, 0, 0]}>
             {scenarios.map((entry, idx) => (
               <Cell key={idx} fill={entry.savings >= 0 ? '#22c55e' : '#ef4444'} />
             ))}
