@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { YearlyCashflow } from '../../types';
+import { useLanguage } from '../../i18n/useLanguage';
 
 interface CashflowChartProps {
   data: YearlyCashflow[];
@@ -23,6 +24,7 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
   selectedIndex,
   onBarClick,
 }) => {
+  const { t } = useLanguage();
   const opacity = (idx: number) =>
     selectedIndex === undefined || idx === selectedIndex ? 1 : 0.35;
 
@@ -60,7 +62,7 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
           />
           <Legend />
 
-          <Bar dataKey="totalRevenue" name="Einnahmen p.a." radius={[4, 4, 0, 0]}>
+          <Bar dataKey="totalRevenue" name={t.cashflowRevenue} radius={[4, 4, 0, 0]}>
             {data.map((entry, idx) => (
               <Cell
                 key={idx}
@@ -69,20 +71,25 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
               />
             ))}
           </Bar>
-          <Bar dataKey="opex" name="Betriebskosten (OPEX)" stackId="costs" fill="#94a3b8">
+          <Bar dataKey="opex" name={t.cashflowOpex} stackId="costs" fill="#94a3b8">
             {data.map((_, idx) => (
               <Cell key={idx} fill="#94a3b8" fillOpacity={opacity(idx)} />
             ))}
           </Bar>
+          <Bar dataKey="interestPaid" name={t.cashflowInterest} stackId="costs" fill="#64748b">
+            {data.map((_, idx) => (
+              <Cell key={idx} fill="#64748b" fillOpacity={opacity(idx)} />
+            ))}
+          </Bar>
           <Bar
-            dataKey="loanInstallment"
-            name="Annuität"
+            dataKey="principalPaid"
+            name={t.cashflowPrincipal}
             stackId="costs"
-            fill="#64748b"
+            fill="#334155"
             radius={[4, 4, 0, 0]}
           >
             {data.map((_, idx) => (
-              <Cell key={idx} fill="#64748b" fillOpacity={opacity(idx)} />
+              <Cell key={idx} fill="#334155" fillOpacity={opacity(idx)} />
             ))}
           </Bar>
         </BarChart>

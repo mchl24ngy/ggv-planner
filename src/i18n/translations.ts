@@ -199,7 +199,9 @@ export const translations = {
     tableSubsidy: '- Mieterstromzuschlag',
     tableFeedIn: '- Einspeisung',
     tableOpex: 'Betriebskosten (OPEX)',
-    tableAnnuity: 'Annuität',
+    tableAnnuity: 'Annuität (Gesamt)',
+    tableInterest: '- Zinsen',
+    tablePrincipal: '- Tilgung',
     tableCashflow: 'Cashflow vor Steuern',
 
     // Tooltip model hint
@@ -222,6 +224,38 @@ export const translations = {
       'Ein größerer Speicher erhöht den Eigenverbrauchsanteil und damit die verkaufte Menge an Mieterstrom – hat aber auch Einfluss auf den CAPEX. Prüfen Sie, ob die Mehrinvestition durch die Mehrerträge gedeckt wird.',
     tooltipOptParticipation:
       'Je höher die Teilnehmerquote, desto mehr Mieter beziehen Strom aus der Anlage – und desto höher sind Grundgebühr- und Mieterstromeinnahmen. In der Praxis liegt die Quote selten bei 100 %.',
+
+    // Tab 3: Monatliche Energieflüsse
+    monthlyFlowTitle: 'Monatliche Energieflüsse',
+    monthlyFlowSubtitle:
+      'Tagesbilanz: PV-Ertrag vs. Verbrauch – skaliert auf Monatswerte. Grün/Gelb/Blau = PV-Nutzung; Rot = Netzbezug.',
+    monthlyFlowDirectConsumption: 'Direktverbrauch',
+    monthlyFlowBatteryCharge: 'Batterieladung',
+    monthlyFlowGridExport: 'Netzeinspeisung',
+    monthlyFlowGridSupply: 'Netzbezug',
+    monthlyFlowTableMonth: 'Monat',
+    monthlyFlowTablePvYield: 'PV-Ertrag',
+    monthlyFlowTableDailyPv: 'PV/Tag',
+    monthlyFlowTableDailyNeed: 'Bedarf/Tag',
+    monthlyFlowTableSelfConsumption: 'Direktverbrauch',
+    monthlyFlowTableBattery: 'Batterieladung',
+    monthlyFlowTableGridExport: 'Netzeinspeisung',
+    monthlyFlowTableGridSupply: 'Netzbezug',
+    monthlyFlowNoData: 'Monatliche Energieflüsse werden nach der ersten Berechnung angezeigt.',
+    btnMonthlyDetail: 'Monatliche Details anzeigen',
+    cashflowRevenue: 'Einnahmen p.a.',
+    cashflowOpex: 'Betriebskosten (OPEX)',
+    cashflowInterest: 'Zinsen',
+    cashflowPrincipal: 'Tilgung',
+    energyMixPv: 'PV-Erzeugung',
+    energyMixBattery: 'Batteriebezug',
+    energyMixGrid: 'Netzbezug',
+    energyMixTooltipLabel: 'Energie',
+    tenantSavingsLabel: 'Ersparnis p.a.',
+    tenantSavingsTooltip: 'Ersparnis p.a.',
+    scenarioMinus50: '-50%',
+    scenarioBase: 'Basis',
+    scenarioPlus50: '+50%',
   },
 
   en: {
@@ -422,7 +456,9 @@ export const translations = {
     tableSubsidy: '- Tenant Elec. Subsidy',
     tableFeedIn: '- Feed-in Revenue',
     tableOpex: 'Operating Costs (OPEX)',
-    tableAnnuity: 'Loan Installment',
+    tableAnnuity: 'Loan Installment (Total)',
+    tableInterest: '- Interest',
+    tablePrincipal: '- Principal Repayment',
     tableCashflow: 'Pre-tax Cashflow',
 
     // Tooltip model hint
@@ -445,6 +481,38 @@ export const translations = {
       'A larger battery increases self-consumption and therefore the volume of tenant electricity sold — but also affects CAPEX. Check whether the additional revenue justifies the extra investment.',
     tooltipOptParticipation:
       'The higher the participation rate, the more tenants draw electricity from the system — increasing base fee and tenant electricity revenues. In practice, 100% participation is rarely achieved.',
+
+    // Tab 3: Monthly energy flows
+    monthlyFlowTitle: 'Monthly Energy Flows',
+    monthlyFlowSubtitle:
+      'Daily balance: PV yield vs. demand – scaled to monthly totals. Green/Yellow/Blue = PV usage; Red = grid supply.',
+    monthlyFlowDirectConsumption: 'Direct self-consumption',
+    monthlyFlowBatteryCharge: 'Battery charge',
+    monthlyFlowGridExport: 'Grid export',
+    monthlyFlowGridSupply: 'Grid supply',
+    monthlyFlowTableMonth: 'Month',
+    monthlyFlowTablePvYield: 'PV yield',
+    monthlyFlowTableDailyPv: 'PV/day',
+    monthlyFlowTableDailyNeed: 'Need/day',
+    monthlyFlowTableSelfConsumption: 'Direct self-cons.',
+    monthlyFlowTableBattery: 'Battery charge',
+    monthlyFlowTableGridExport: 'Grid export',
+    monthlyFlowTableGridSupply: 'Grid supply',
+    monthlyFlowNoData: 'Monthly energy flows will be shown after the first calculation.',
+    btnMonthlyDetail: 'Show monthly details',
+    cashflowRevenue: 'Revenue p.a.',
+    cashflowOpex: 'Operating costs (OPEX)',
+    cashflowInterest: 'Interest',
+    cashflowPrincipal: 'Principal',
+    energyMixPv: 'PV generation',
+    energyMixBattery: 'Battery discharge',
+    energyMixGrid: 'Grid supply',
+    energyMixTooltipLabel: 'Energy',
+    tenantSavingsLabel: 'Savings p.a.',
+    tenantSavingsTooltip: 'Savings p.a.',
+    scenarioMinus50: '-50%',
+    scenarioBase: 'Base',
+    scenarioPlus50: '+50%',
   },
 } as const;
 

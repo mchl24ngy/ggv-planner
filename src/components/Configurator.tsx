@@ -6,12 +6,15 @@ import {
   FinancingParams,
   EnergyResults,
   EconomicResults,
+  MonthlyEnergyFlow,
 } from '../types';
 import { fetchPvgisYield, calculateEnergyYield, calculateEconomics } from '../lib/calculations';
+import { fetchPvgisMonthlyYield, calculateMonthlyEnergyFlows } from '../lib/energyFlowCalculation';
 import { KPIDisplay } from './KPIDisplay';
 import { EnergyMixChart } from './charts/EnergyMixChart';
 import { CashflowChart } from './charts/CashflowChart';
 import { TenantSavingsChart } from './charts/TenantSavingsChart';
+import { MonthlyEnergyFlowChart } from './charts/MonthlyEnergyFlowChart';
 import { Tooltip } from './Tooltip';
 import { BreakdownModal } from './BreakdownModal';
 import { AddressAutocomplete } from './AddressAutocomplete';
@@ -26,12 +29,13 @@ import {
   SlidersHorizontal,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   Info,
   List,
 } from 'lucide-react';
 
 export const Configurator: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [activeTab, setActiveTab] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedYearIndex, setSelectedYearIndex] = useState(0);
@@ -125,15 +129,30 @@ export const Configurator: React.FC = () => {
     cashflowPlan: [],
   });
 
+  const [monthlyFlows, setMonthlyFlows] = useState<MonthlyEnergyFlow[]>([]);
+  const [isMonthlyTableExpanded, setIsMonthlyTableExpanded] = useState(true);
+
   // Effect: Recalculate everything when inputs change
   useEffect(() => {
     const runSimulation = async () => {
       setIsLoading(true);
-      const pvYield = await fetchPvgisYield(system);
+
+      // Jährliche und monatliche PV-Daten parallel aus PVGIS abrufen
+      const [pvYield, monthlyPvKwh] = await Promise.all([
+        fetchPvgisYield(system),
+        fetchPvgisMonthlyYield(system),
+      ]);
+
       const newEnergy = calculateEnergyYield(pvYield, system, consumption);
       setEnergy(newEnergy);
+
       const newEco = calculateEconomics(newEnergy, economics, financing, consumption);
       setEcoResults(newEco);
+
+      // Monatliche Energieflüsse auf Basis der PVGIS-Monatsdaten berechnen
+      const newMonthlyFlows = calculateMonthlyEnergyFlows(monthlyPvKwh, system, consumption);
+      setMonthlyFlows(newMonthlyFlows);
+
       setIsLoading(false);
     };
 
@@ -1004,6 +1023,20 @@ export const Configurator: React.FC = () => {
                         </span>
                       </div>
                     </div>
+
+                    {monthlyFlows.length > 0 && (
+                      <button
+                        onClick={() =>
+                          document
+                            .getElementById('monthly-energy-flows')
+                            ?.scrollIntoView({ behavior: 'smooth' })
+                        }
+                        className="mt-4 w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-100"
+                      >
+                        <ChevronDown size={13} />
+                        {t.btnMonthlyDetail}
+                      </button>
+                    )}
                     <div className="mt-6 w-full border-t border-slate-200 pt-4">
                       <h3 className="font-semibold text-slate-700 mb-1 text-center text-sm">
                         {t.chartTenantSavingsTitle}
@@ -1145,6 +1178,33 @@ export const Configurator: React.FC = () => {
                                   ]?.loanInstallment.toFixed(2)}
                                 </td>
                               </tr>
+                              {(ecoResults.cashflowPlan[selectedYearIndex]?.loanInstallment ?? 0) >
+                                0 && (
+                                <>
+                                  <tr className="border-b border-slate-100 bg-slate-50/50">
+                                    <td className="px-4 py-1.5 pl-8 text-slate-500 text-xs">
+                                      {t.tableInterest}
+                                    </td>
+                                    <td className="px-4 py-1.5 text-right text-slate-500 text-xs">
+                                      -
+                                      {ecoResults.cashflowPlan[
+                                        selectedYearIndex
+                                      ]?.interestPaid.toFixed(2)}
+                                    </td>
+                                  </tr>
+                                  <tr className="border-b border-slate-100 bg-slate-50/50">
+                                    <td className="px-4 py-1.5 pl-8 text-slate-500 text-xs">
+                                      {t.tablePrincipal}
+                                    </td>
+                                    <td className="px-4 py-1.5 text-right text-slate-500 text-xs">
+                                      -
+                                      {ecoResults.cashflowPlan[
+                                        selectedYearIndex
+                                      ]?.principalPaid.toFixed(2)}
+                                    </td>
+                                  </tr>
+                                </>
+                              )}
                               <tr className="bg-blue-50">
                                 <td className="px-4 py-3 font-semibold text-slate-800">
                                   {t.tableCashflow}
@@ -1165,6 +1225,165 @@ export const Configurator: React.FC = () => {
                   {t.noData}
                 </div>
               )}
+
+              {/* Monatliche Energieflüsse – volle Breite, ganz unten in Tab 3 */}
+              <div
+                id="monthly-energy-flows"
+                className="mt-8 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden"
+              >
+                <div className="bg-slate-50 px-5 py-4 border-b border-slate-200">
+                  <h3 className="font-semibold text-slate-700 text-base">{t.monthlyFlowTitle}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">{t.monthlyFlowSubtitle}</p>
+                </div>
+
+                {monthlyFlows.length > 0 ? (
+                  <>
+                    <div className="p-4">
+                      <MonthlyEnergyFlowChart data={monthlyFlows} />
+                    </div>
+
+                    {/* Ausklappbare Detailtabelle */}
+                    <div className="border-t border-slate-200">
+                      <button
+                        onClick={() => setIsMonthlyTableExpanded((v) => !v)}
+                        className="w-full flex items-center justify-between px-5 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                      >
+                        <span>
+                          {t.monthlyFlowTableMonth} – {t.monthlyFlowTitle}
+                        </span>
+                        <ChevronDown
+                          size={16}
+                          className={`text-slate-400 transition-transform duration-200 ${isMonthlyTableExpanded ? 'rotate-180' : ''}`}
+                        />
+                      </button>
+
+                      {isMonthlyTableExpanded && (
+                        <div className="overflow-x-auto border-t border-slate-100">
+                          <table className="w-full text-xs text-left">
+                            <thead className="bg-slate-50 text-slate-500">
+                              <tr>
+                                <th className="px-3 py-2 font-medium">{t.monthlyFlowTableMonth}</th>
+                                <th className="px-3 py-2 font-medium text-right text-green-700">
+                                  {t.monthlyFlowTablePvYield}
+                                </th>
+                                <th className="px-3 py-2 font-medium text-right text-slate-500">
+                                  {t.monthlyFlowTableDailyPv}
+                                </th>
+                                <th className="px-3 py-2 font-medium text-right text-slate-500">
+                                  {t.monthlyFlowTableDailyNeed}
+                                </th>
+                                <th className="px-3 py-2 font-medium text-right text-green-600">
+                                  {t.monthlyFlowTableSelfConsumption}
+                                </th>
+                                <th className="px-3 py-2 font-medium text-right text-blue-600">
+                                  {t.monthlyFlowTableBattery}
+                                </th>
+                                <th className="px-3 py-2 font-medium text-right text-slate-500">
+                                  {t.monthlyFlowTableGridExport}
+                                </th>
+                                <th className="px-3 py-2 font-medium text-right text-red-500">
+                                  {t.monthlyFlowTableGridSupply}
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {monthlyFlows.map((m) => (
+                                <tr
+                                  key={m.month}
+                                  className="border-t border-slate-100 hover:bg-slate-50"
+                                >
+                                  <td className="px-3 py-1.5 font-medium text-slate-700">
+                                    {lang === 'de'
+                                      ? [
+                                          'Jan',
+                                          'Feb',
+                                          'Mär',
+                                          'Apr',
+                                          'Mai',
+                                          'Jun',
+                                          'Jul',
+                                          'Aug',
+                                          'Sep',
+                                          'Okt',
+                                          'Nov',
+                                          'Dez',
+                                        ][m.month - 1]
+                                      : [
+                                          'Jan',
+                                          'Feb',
+                                          'Mar',
+                                          'Apr',
+                                          'May',
+                                          'Jun',
+                                          'Jul',
+                                          'Aug',
+                                          'Sep',
+                                          'Oct',
+                                          'Nov',
+                                          'Dec',
+                                        ][m.month - 1]}
+                                  </td>
+                                  <td className="px-3 py-1.5 text-right text-green-700 font-medium">
+                                    {m.pvYieldKwh.toFixed(0)}
+                                  </td>
+                                  <td className="px-3 py-1.5 text-right text-slate-500">
+                                    {m.dailyPvKwh.toFixed(1)}
+                                  </td>
+                                  <td className="px-3 py-1.5 text-right text-slate-500">
+                                    {m.dailyNeedKwh.toFixed(1)}
+                                  </td>
+                                  <td className="px-3 py-1.5 text-right text-green-600">
+                                    {m.selfConsumptionKwh.toFixed(0)}
+                                  </td>
+                                  <td className="px-3 py-1.5 text-right text-blue-600">
+                                    {m.batteryChargeKwh.toFixed(0)}
+                                  </td>
+                                  <td className="px-3 py-1.5 text-right text-slate-500">
+                                    {m.gridExportKwh.toFixed(0)}
+                                  </td>
+                                  <td className="px-3 py-1.5 text-right text-red-500 font-medium">
+                                    {m.gridSupplyKwh.toFixed(0)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot className="bg-slate-50 border-t-2 border-slate-200 text-slate-600 font-semibold">
+                              <tr>
+                                <td className="px-3 py-2">∑</td>
+                                <td className="px-3 py-2 text-right text-green-700">
+                                  {monthlyFlows.reduce((s, m) => s + m.pvYieldKwh, 0).toFixed(0)}
+                                </td>
+                                <td className="px-3 py-2" />
+                                <td className="px-3 py-2" />
+                                <td className="px-3 py-2 text-right text-green-600">
+                                  {monthlyFlows
+                                    .reduce((s, m) => s + m.selfConsumptionKwh, 0)
+                                    .toFixed(0)}
+                                </td>
+                                <td className="px-3 py-2 text-right text-blue-600">
+                                  {monthlyFlows
+                                    .reduce((s, m) => s + m.batteryChargeKwh, 0)
+                                    .toFixed(0)}
+                                </td>
+                                <td className="px-3 py-2 text-right text-slate-500">
+                                  {monthlyFlows.reduce((s, m) => s + m.gridExportKwh, 0).toFixed(0)}
+                                </td>
+                                <td className="px-3 py-2 text-right text-red-500">
+                                  {monthlyFlows.reduce((s, m) => s + m.gridSupplyKwh, 0).toFixed(0)}
+                                </td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-6 text-center text-slate-400 text-sm">
+                    {t.monthlyFlowNoData}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
