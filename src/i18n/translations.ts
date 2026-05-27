@@ -100,9 +100,9 @@ export const translations = {
     sectionTariffs: 'Tarife & Fördersätze',
     sectionFinancing: 'Investition & Finanzierung',
 
-    labelTenantRate: 'Verkaufspreis Mieter (ct)',
+    labelTenantRate: 'Netto-Verkaufspreis Mieter (ct)',
     tooltipTenantRate:
-      'Der ct/kWh-Preis, den der Betreiber an die Mieter für den Mieterstrom berechnet. Muss mindestens 10% unter dem lokalen Grundversorger-Tarif liegen.',
+      'Der ct/kWh-Preis, den der Betreiber an die Mieter für den Mieterstrom berechnet. Muss mindestens 10% unter dem lokalen Grundversorger-Tarif liegen. Dieser ist umsatzsteuerpflichtig, daher Netto-Angabe.',
 
     labelFeedIn: 'Einspeisevergütung (ct)',
     tooltipFeedIn:
@@ -356,9 +356,9 @@ export const translations = {
     sectionTariffs: 'Tariffs & Subsidies',
     sectionFinancing: 'Investment & Financing',
 
-    labelTenantRate: 'Tenant Sales Price (ct)',
+    labelTenantRate: 'Net Tenant Sales Price (ct)',
     tooltipTenantRate:
-      'The ct/kWh price the operator charges tenants for electricity. Must be at least 10% below the local utility tariff.',
+      'The ct/kWh price the operator charges tenants for electricity. Must be at least 10% below the local utility tariff. This item is subject to sales tax, so the price is listed as a net amount.',
 
     labelFeedIn: 'Feed-in Tariff (ct)',
     tooltipFeedIn:

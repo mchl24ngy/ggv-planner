@@ -62,7 +62,7 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
           />
           <Legend />
 
-          <Bar dataKey="totalRevenue" name={t.cashflowRevenue} radius={[4, 4, 0, 0]}>
+          <Bar dataKey="totalRevenue" name={t.cashflowRevenue} fill="#22c55e" radius={[4, 4, 0, 0]}>
             {data.map((entry, idx) => (
               <Cell
                 key={idx}
@@ -71,9 +71,9 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
               />
             ))}
           </Bar>
-          <Bar dataKey="opex" name={t.cashflowOpex} stackId="costs" fill="#94a3b8">
+          <Bar dataKey="opex" name={t.cashflowOpex} stackId="costs" fill="#3b82f6">
             {data.map((_, idx) => (
-              <Cell key={idx} fill="#94a3b8" fillOpacity={opacity(idx)} />
+              <Cell key={idx} fill="#3b82f6" fillOpacity={opacity(idx)} />
             ))}
           </Bar>
           <Bar dataKey="interestPaid" name={t.cashflowInterest} stackId="costs" fill="#64748b">
