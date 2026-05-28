@@ -38,7 +38,6 @@ import {
   CheckCircle,
   AlertCircle,
 } from 'lucide-react';
-import { exportToPdf } from '../lib/pdfExport';
 import { exportToJson, importFromJson } from '../lib/jsonExport';
 import type { GgvPlannerExportUi } from '../lib/jsonExport';
 
@@ -164,6 +163,7 @@ export const Configurator: React.FC = () => {
   const handleExportPdf = async () => {
     setIsPdfExporting(true);
     try {
+      const { exportToPdf } = await import('../lib/pdfExport');
       await exportToPdf(system, consumption, economics, financing, energy, ecoResults, lang);
     } finally {
       setIsPdfExporting(false);
