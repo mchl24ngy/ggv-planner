@@ -1,6 +1,19 @@
 import jsPDF from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
+
+function buildFilename(address: string): string {
+  const date = new Date().toISOString().slice(0, 10);
+  const slug = address
+    .replace(/[,/\\]/g, ' ')
+    .trim()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9_À-ɏ-]/g, '')
+    .replace(/_+/g, '_')
+    .slice(0, 50)
+    .replace(/_+$/, '');
+  return `${date}_${slug || 'export'}.pdf`;
+}
 import type {
   SystemParams,
   ConsumptionParams,
@@ -385,5 +398,5 @@ export async function exportToPdf(
     fitImage(pdf, monthlyCapture, M, botY + 2, CONTENT_W, botH - 2);
   }
 
-  pdf.save(`ggv-planner-${new Date().toISOString().split('T')[0]}.pdf`);
+  pdf.save(buildFilename(system.address));
 }

@@ -3,6 +3,19 @@ import type { SystemParams, ConsumptionParams, EconomicParams, FinancingParams }
 const APP_ID = 'ggv-planner';
 const SCHEMA_VERSION = '1';
 
+function buildFilename(address: string, ext: string): string {
+  const date = new Date().toISOString().slice(0, 10);
+  const slug = address
+    .replace(/[,/\\]/g, ' ')
+    .trim()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9_À-ɏ-]/g, '')
+    .replace(/_+/g, '_')
+    .slice(0, 50)
+    .replace(/_+$/, '');
+  return `${date}_${slug || 'export'}.${ext}`;
+}
+
 export interface GgvPlannerExportUi {
   expertMode: boolean;
   pvInputMode: 'kwp' | 'sqm';
@@ -57,10 +70,9 @@ export function exportToJson(
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const dateStr = new Date().toISOString().slice(0, 10);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `ggv-planner-config-${dateStr}.json`;
+  a.download = buildFilename(system.address, 'json');
   a.click();
   URL.revokeObjectURL(url);
 }
