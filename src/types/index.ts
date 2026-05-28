@@ -30,6 +30,7 @@ export interface EconomicParams {
   feedInTariff: number; // EEG-Vergütung für Einspeisung (ct/kWh)
   tenantElectricitySubsidy: number; // Mieterstromzuschlag (variabel) (ct/kWh)
   baseFeePerMonth: number; // Grundgebühr pro Monat/WE (€)
+  roofRentPerMonth: number; // Monatliche Dachpacht (€)
   capex: number; // Investitionskosten (€)
   opexPerYear: number; // Jährliche Betriebskosten (€)
   calculationPeriodYears: number; // Betrachtungszeitraum in Jahren (z.B. 20)
@@ -80,7 +81,7 @@ export interface YearlyCashflow {
 export interface EconomicResults {
   lcoe: number; // Stromgestehungskosten (€/kWh)
   amortizationYears: number | null; // Amortisationszeit in Jahren
-  roi: number; // Return on Investment in %
+  accumulatedCashflow: number; // Summe aller jährlichen Cashflows vor Steuern über den Betrachtungszeitraum
   cashflowPlan: YearlyCashflow[];
 }
 

@@ -32,7 +32,14 @@ import {
   ChevronDown,
   Info,
   List,
+  FileDown,
+  Upload,
+  Download,
+  CheckCircle,
+  AlertCircle,
 } from 'lucide-react';
+import { exportToJson, importFromJson } from '../lib/jsonExport';
+import type { GgvPlannerExportUi } from '../lib/jsonExport';
 
 export const Configurator: React.FC = () => {
   const { t, lang } = useLanguage();
@@ -45,12 +52,12 @@ export const Configurator: React.FC = () => {
     address: 'Berlin, Germany',
     locationLat: 52.52,
     locationLon: 13.405,
-    inclination: 30,
+    inclination: 35,
     azimuth: 0,
     systemLoss: 14,
     pvCapacityKwp: 50,
     hasBattery: true,
-    batteryCapacityKwh: 20,
+    batteryCapacityKwh: 25,
   });
 
   const [consumption, setConsumption] = useState<ConsumptionParams>({
@@ -68,11 +75,12 @@ export const Configurator: React.FC = () => {
 
   const [economics, setEconomics] = useState<EconomicParams>({
     model: 'Mieterstrom',
-    tenantElectricityRate: 25,
+    tenantElectricityRate: 20,
     gridElectricityRate: 35,
     feedInTariff: 5,
     tenantElectricitySubsidy: 2.1,
     baseFeePerMonth: 10,
+    roofRentPerMonth: 50,
     capex: 75000,
     opexPerYear: 1500,
     calculationPeriodYears: 20,
@@ -83,6 +91,102 @@ export const Configurator: React.FC = () => {
     loanTermYears: 10,
     interestRate: 4.5,
   });
+
+  const [expertMode, setExpertMode] = useState(false);
+  const [isPdfExporting, setIsPdfExporting] = useState(false);
+
+  type JsonNotification = {
+    type: 'success' | 'error';
+    messageKey: 'jsonImportErrorInvalidJson' | 'jsonImportErrorWrongAppId' | 'jsonImportSuccess';
+  } | null;
+  const [jsonNotification, setJsonNotification] = useState<JsonNotification>(null);
+
+  const showJsonNotification = (
+    type: 'success' | 'error',
+    messageKey: 'jsonImportErrorInvalidJson' | 'jsonImportErrorWrongAppId' | 'jsonImportSuccess'
+  ) => {
+    setJsonNotification({ type, messageKey });
+    setTimeout(() => setJsonNotification(null), 4000);
+  };
+
+  const handleExportJson = () => {
+    const ui: GgvPlannerExportUi = { expertMode, pvInputMode, roofAreaM2 };
+    exportToJson(system, consumption, economics, financing, ui);
+  };
+
+  const handleImportJson = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const defaults: GgvPlannerExportUi = { expertMode, pvInputMode, roofAreaM2 };
+    const result = await importFromJson(file, {
+      system,
+      consumption,
+      economics,
+      financing,
+      ui: defaults,
+    });
+
+    if (!result.ok) {
+      showJsonNotification(
+        'error',
+        result.errorKey === 'wrongAppId'
+          ? 'jsonImportErrorWrongAppId'
+          : 'jsonImportErrorInvalidJson'
+      );
+      return;
+    }
+
+    setSystem(result.system);
+    setConsumption(result.consumption);
+    setEconomics(result.economics);
+    setFinancing(result.financing);
+    setExpertMode(result.ui.expertMode);
+    setPvInputMode(result.ui.pvInputMode);
+    setRoofAreaM2(result.ui.roofAreaM2);
+    const newLoanPct =
+      result.economics.capex > 0
+        ? Math.round((result.financing.loanAmount / result.economics.capex) * 100)
+        : 0;
+    setLoanPercentage(Math.min(100, Math.max(0, newLoanPct)));
+    showJsonNotification('success', 'jsonImportSuccess');
+  };
+
+  const handleExpertModeToggle = (enabled: boolean) => {
+    setExpertMode(enabled);
+    if (!enabled) {
+      setSystem((s) => ({ ...s, inclination: 35, azimuth: 0 }));
+    }
+  };
+
+  const handleExportPdf = async () => {
+    setIsPdfExporting(true);
+    try {
+      const { exportToPdf } = await import('../lib/pdfExport');
+      await exportToPdf(system, consumption, economics, financing, energy, ecoResults, lang);
+    } finally {
+      setIsPdfExporting(false);
+    }
+  };
+
+  const [pvInputMode, setPvInputMode] = useState<'kwp' | 'sqm'>('kwp');
+  // kWp = (m² / 5) * 0.8  →  m² = kWp / 0.8 * 5 = kWp * 6.25
+  const [roofAreaM2, setRoofAreaM2] = useState(Math.round(50 * 6.25));
+
+  const leanKwpFromArea = (m2: number) => Math.round((m2 / 5) * 0.8 * 10) / 10;
+
+  const handleRoofAreaChange = (m2: number) => {
+    setRoofAreaM2(m2);
+    setSystem((s) => ({ ...s, pvCapacityKwp: leanKwpFromArea(m2) }));
+  };
+
+  const handlePvModeSwitch = (mode: 'kwp' | 'sqm') => {
+    if (mode === 'sqm') {
+      setRoofAreaM2(Math.round(system.pvCapacityKwp * 6.25));
+    }
+    setPvInputMode(mode);
+  };
 
   const [loanPercentage, setLoanPercentage] = useState(Math.round((50000 / 75000) * 100));
 
@@ -125,7 +229,7 @@ export const Configurator: React.FC = () => {
   const [ecoResults, setEcoResults] = useState<EconomicResults>({
     lcoe: 0,
     amortizationYears: null,
-    roi: 0,
+    accumulatedCashflow: 0,
     cashflowPlan: [],
   });
 
@@ -282,26 +386,89 @@ export const Configurator: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="flex justify-between text-sm font-medium text-slate-700 mb-2">
-                      <span className="flex items-center">
-                        {t.labelPvCapacity}
-                        <Tooltip text={t.tooltipPvCapacity} />
+                    {/* Mode toggle */}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="flex items-center text-sm font-medium text-slate-700">
+                        {pvInputMode === 'kwp' ? t.labelPvCapacity : t.labelRoofArea}
+                        <Tooltip
+                          text={pvInputMode === 'kwp' ? t.tooltipPvCapacity : t.tooltipRoofArea}
+                        />
                       </span>
-                      <span className="text-blue-600 font-semibold">
-                        {system.pvCapacityKwp} kWp
-                      </span>
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="200"
-                      step="5"
-                      value={system.pvCapacityKwp}
-                      onChange={(e) =>
-                        setSystem({ ...system, pvCapacityKwp: Number(e.target.value) })
-                      }
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    />
+                      <div className="flex rounded-lg border border-slate-200 overflow-hidden text-xs font-medium">
+                        <button
+                          type="button"
+                          onClick={() => handlePvModeSwitch('kwp')}
+                          className={`px-2.5 py-1 transition-colors ${pvInputMode === 'kwp' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+                        >
+                          {t.pvInputToggleKwp}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handlePvModeSwitch('sqm')}
+                          className={`px-2.5 py-1 transition-colors ${pvInputMode === 'sqm' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+                        >
+                          {t.pvInputToggleSqm}
+                        </button>
+                      </div>
+                    </div>
+
+                    {pvInputMode === 'kwp' ? (
+                      <>
+                        <div className="flex justify-end mb-1">
+                          <span className="text-blue-600 font-semibold text-sm">
+                            {system.pvCapacityKwp} kWp
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="200"
+                          step="5"
+                          value={system.pvCapacityKwp}
+                          onChange={(e) =>
+                            setSystem({ ...system, pvCapacityKwp: Number(e.target.value) })
+                          }
+                          className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <input
+                          type="number"
+                          min="0"
+                          step="5"
+                          value={roofAreaM2}
+                          onChange={(e) => handleRoofAreaChange(Number(e.target.value))}
+                          className={inputClass}
+                        />
+                        <p className="text-xs text-blue-600 font-medium mt-1">
+                          {t.pvCapacityFromArea.replace('{kwp}', String(system.pvCapacityKwp))}
+                        </p>
+                        <a
+                          href={`https://www.google.com/maps/@${system.locationLat},${system.locationLon},19z/data=!3m1!1e3`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-blue-600 mt-1.5 hover:underline"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M15 3h6v6" />
+                            <path d="M10 14 21 3" />
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                          </svg>
+                          {t.roofAreaMapsLink}
+                        </a>
+                      </>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-3 pt-2 w-full">
@@ -337,6 +504,92 @@ export const Configurator: React.FC = () => {
                           className="w-20 px-3 py-1.5 border border-slate-200 rounded-lg text-sm outline-none focus:border-blue-500"
                         />
                         <span className="text-sm text-slate-600">{t.labelBatteryCapacity}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Expert mode toggle */}
+                  <div className="pt-1">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          className="sr-only"
+                          checked={expertMode}
+                          onChange={(e) => handleExpertModeToggle(e.target.checked)}
+                        />
+                        <div
+                          className={`block w-10 h-6 rounded-full transition-colors ${expertMode ? 'bg-blue-500' : 'bg-slate-300'}`}
+                        />
+                        <div
+                          className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${expertMode ? 'transform translate-x-4' : ''}`}
+                        />
+                      </div>
+                      <span className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                        {t.expertModeLabel}
+                        <Tooltip text={t.tooltipExpertMode} />
+                      </span>
+                    </label>
+
+                    {!expertMode && (
+                      <p className="text-xs text-slate-400 mt-1 ml-12">{t.expertModeDefault}</p>
+                    )}
+
+                    {expertMode && (
+                      <div className="mt-3 grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                        <div>
+                          <label className="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                            <span className="flex items-center">
+                              {t.labelInclination}
+                              <Tooltip text={t.tooltipInclination} />
+                            </span>
+                            <span className="text-blue-600 font-semibold">
+                              {system.inclination}°
+                            </span>
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="90"
+                            step="5"
+                            value={system.inclination}
+                            onChange={(e) =>
+                              setSystem({ ...system, inclination: Number(e.target.value) })
+                            }
+                            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                          />
+                          <div className="flex justify-between text-xs text-slate-400 mt-1">
+                            <span>0°</span>
+                            <span>45°</span>
+                            <span>90°</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                            <span className="flex items-center">
+                              {t.labelAzimuth}
+                              <Tooltip text={t.tooltipAzimuth} />
+                            </span>
+                            <span className="text-blue-600 font-semibold">{system.azimuth}°</span>
+                          </label>
+                          <input
+                            type="range"
+                            min="-90"
+                            max="90"
+                            step="5"
+                            value={system.azimuth}
+                            onChange={(e) =>
+                              setSystem({ ...system, azimuth: Number(e.target.value) })
+                            }
+                            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                          />
+                          <div className="flex justify-between text-xs text-slate-400 mt-1">
+                            <span>{t.azimuthEast}</span>
+                            <span>{t.azimuthSouth}</span>
+                            <span>{t.azimuthWest}</span>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -562,14 +815,51 @@ export const Configurator: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end mt-8">
-                <button
-                  onClick={() => setActiveTab(2)}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {t.btnNext}
-                  <ChevronRight size={18} />
-                </button>
+              <div className="mt-8 space-y-3">
+                {jsonNotification && (
+                  <div
+                    className={`flex items-center gap-2 text-sm px-4 py-2.5 rounded-lg border ${
+                      jsonNotification.type === 'success'
+                        ? 'bg-green-50 text-green-700 border-green-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
+                    }`}
+                  >
+                    {jsonNotification.type === 'success' ? (
+                      <CheckCircle size={16} />
+                    ) : (
+                      <AlertCircle size={16} />
+                    )}
+                    {t[jsonNotification.messageKey]}
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-600 font-medium rounded-lg hover:bg-slate-50 cursor-pointer transition-colors text-sm">
+                      <Upload size={16} />
+                      {t.btnImportJson}
+                      <input
+                        type="file"
+                        accept=".json"
+                        className="sr-only"
+                        onChange={handleImportJson}
+                      />
+                    </label>
+                    <button
+                      onClick={handleExportJson}
+                      className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition-colors text-sm"
+                    >
+                      <Download size={16} />
+                      {t.btnExportJson}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab(2)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {t.btnNext}
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -733,7 +1023,24 @@ export const Configurator: React.FC = () => {
                           className={inputClassEco}
                         />
                       </div>
-                      <div></div>
+                      <div>
+                        <label className="flex items-center text-sm font-medium text-slate-700 mb-1">
+                          {t.labelRoofRent}
+                          <Tooltip text={t.tooltipRoofRent} />
+                        </label>
+                        <input
+                          type="number"
+                          step="1"
+                          value={economics.roofRentPerMonth}
+                          onChange={(e) =>
+                            setEconomics({
+                              ...economics,
+                              roofRentPerMonth: Number(e.target.value),
+                            })
+                          }
+                          className={inputClassEco}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -856,14 +1163,51 @@ export const Configurator: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end mt-8">
-                <button
-                  onClick={() => setActiveTab(3)}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {t.btnNext}
-                  <ChevronRight size={18} />
-                </button>
+              <div className="mt-8 space-y-3">
+                {jsonNotification && (
+                  <div
+                    className={`flex items-center gap-2 text-sm px-4 py-2.5 rounded-lg border ${
+                      jsonNotification.type === 'success'
+                        ? 'bg-green-50 text-green-700 border-green-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
+                    }`}
+                  >
+                    {jsonNotification.type === 'success' ? (
+                      <CheckCircle size={16} />
+                    ) : (
+                      <AlertCircle size={16} />
+                    )}
+                    {t[jsonNotification.messageKey]}
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-600 font-medium rounded-lg hover:bg-slate-50 cursor-pointer transition-colors text-sm">
+                      <Upload size={16} />
+                      {t.btnImportJson}
+                      <input
+                        type="file"
+                        accept=".json"
+                        className="sr-only"
+                        onChange={handleImportJson}
+                      />
+                    </label>
+                    <button
+                      onClick={handleExportJson}
+                      className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition-colors text-sm"
+                    >
+                      <Download size={16} />
+                      {t.btnExportJson}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab(3)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {t.btnNext}
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -871,10 +1215,24 @@ export const Configurator: React.FC = () => {
           {/* TAB 3: Results */}
           {activeTab === 3 && (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full flex flex-col">
-              <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <LineChart className="text-blue-500" />
-                {t.tab3Title}
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                  <LineChart className="text-blue-500" />
+                  {t.tab3Title}
+                </h2>
+                <button
+                  onClick={handleExportPdf}
+                  disabled={isPdfExporting || ecoResults.cashflowPlan.length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isPdfExporting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                  ) : (
+                    <FileDown size={16} />
+                  )}
+                  {isPdfExporting ? t.pdfExporting : t.btnExportPdf}
+                </button>
+              </div>
 
               {/* Optimization Panel */}
               <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-5">
@@ -889,14 +1247,8 @@ export const Configurator: React.FC = () => {
                   const rateMin = Math.max(1, Math.round(rateBase * 0.5 * 2) / 2);
                   const rateMax = Math.round(rateBase * 1.5 * 2) / 2;
 
-                  // Batterie: min immer 0 (= kein Speicher), max +50% des konfigurierten Wertes
-                  const battBase = optimizationBase.hasBattery
-                    ? optimizationBase.batteryCapacityKwh
-                    : 20;
-                  const battMax = Math.max(30, Math.round((battBase * 1.5) / 5) * 5);
-
                   return (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Slider: Verkaufspreis */}
                       <div>
                         <label className="flex justify-between text-sm font-medium text-slate-700 mb-2">
@@ -926,39 +1278,6 @@ export const Configurator: React.FC = () => {
                         <div className="flex justify-between text-xs text-slate-400 mt-1">
                           <span>{rateMin.toFixed(1)} ct (−50 %)</span>
                           <span>+50 % {rateMax.toFixed(1)} ct</span>
-                        </div>
-                      </div>
-
-                      {/* Slider: Batteriespeicher */}
-                      <div>
-                        <label className="flex justify-between text-sm font-medium text-slate-700 mb-2">
-                          <span className="flex items-center gap-1">
-                            <Battery size={14} />
-                            {t.labelOptBattery}
-                            <Tooltip text={t.tooltipOptBattery} />
-                          </span>
-                          <span className="text-green-700 font-semibold">
-                            {system.hasBattery && system.batteryCapacityKwh > 0
-                              ? `${system.batteryCapacityKwh} kWh`
-                              : t.noBattery}
-                          </span>
-                        </label>
-                        <input
-                          type="range"
-                          min="0"
-                          max={battMax}
-                          step="5"
-                          value={system.hasBattery ? system.batteryCapacityKwh : 0}
-                          onChange={(e) => {
-                            const val = Number(e.target.value);
-                            setSystem({ ...system, hasBattery: val > 0, batteryCapacityKwh: val });
-                          }}
-                          className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-green-600"
-                          style={{ background: '#bbf7d0' }}
-                        />
-                        <div className="flex justify-between text-xs text-slate-400 mt-1">
-                          <span>{t.noBattery}</span>
-                          <span>+50 % {battMax} kWh</span>
                         </div>
                       </div>
 
@@ -1000,11 +1319,16 @@ export const Configurator: React.FC = () => {
 
               {ecoResults.cashflowPlan.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  <div className="lg:col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col items-center">
-                    <h3 className="font-semibold text-slate-700 mb-4 text-center">
-                      {t.chartEnergyTitle}
-                    </h3>
-                    <EnergyMixChart energy={energy} />
+                  <div
+                    id="pdf-chart-energy-col"
+                    className="lg:col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col items-center"
+                  >
+                    <div id="pdf-chart-pie" className="w-full flex flex-col items-center">
+                      <h3 className="font-semibold text-slate-700 mb-4 text-center">
+                        {t.chartEnergyTitle}
+                      </h3>
+                      <EnergyMixChart energy={energy} />
+                    </div>
                     <div className="mt-4 text-sm text-slate-600 space-y-2 w-full px-4">
                       <div className="flex justify-between border-b border-slate-200 pb-1">
                         <span>{t.labelPvYield}</span>{' '}
@@ -1037,7 +1361,10 @@ export const Configurator: React.FC = () => {
                         {t.btnMonthlyDetail}
                       </button>
                     )}
-                    <div className="mt-6 w-full border-t border-slate-200 pt-4">
+                    <div
+                      id="pdf-chart-savings"
+                      className="mt-6 w-full border-t border-slate-200 pt-4"
+                    >
                       <h3 className="font-semibold text-slate-700 mb-1 text-center text-sm">
                         {t.chartTenantSavingsTitle}
                       </h3>
@@ -1059,11 +1386,13 @@ export const Configurator: React.FC = () => {
                         String(economics.calculationPeriodYears)
                       )}
                     </h3>
-                    <CashflowChart
-                      data={ecoResults.cashflowPlan}
-                      selectedIndex={selectedYearIndex}
-                      onBarClick={(idx: number) => setSelectedYearIndex(idx)}
-                    />
+                    <div id="pdf-chart-cashflow">
+                      <CashflowChart
+                        data={ecoResults.cashflowPlan}
+                        selectedIndex={selectedYearIndex}
+                        onBarClick={(idx: number) => setSelectedYearIndex(idx)}
+                      />
+                    </div>
 
                     {ecoResults.cashflowPlan.length > 0 && (
                       <div className="mt-8 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -1238,7 +1567,7 @@ export const Configurator: React.FC = () => {
 
                 {monthlyFlows.length > 0 ? (
                   <>
-                    <div className="p-4">
+                    <div id="pdf-chart-monthly" className="p-4">
                       <MonthlyEnergyFlowChart data={monthlyFlows} />
                     </div>
 

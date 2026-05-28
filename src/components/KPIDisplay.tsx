@@ -67,12 +67,12 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics }) => 
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
         <span className="text-sm font-medium text-slate-500 mb-1 flex items-center">
-          {t.kpiRoi}
-          <Tooltip text={t.tooltipKpiRoi} />
+          {t.kpiAccumulatedCashflow}
+          <Tooltip text={t.tooltipKpiAccumulatedCashflow} />
         </span>
         <span className="text-3xl font-bold text-emerald-400">
-          {economics.roi !== Infinity ? economics.roi.toFixed(1) : '—'}{' '}
-          <span className="text-lg font-normal">%</span>
+          {(economics.accumulatedCashflow / 1000).toFixed(1)}{' '}
+          <span className="text-lg font-normal">T€</span>
         </span>
       </div>
     </div>

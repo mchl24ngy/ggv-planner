@@ -191,7 +191,9 @@ export function calculateEconomics(
     }
 
     const totalRevenue = revenueTenantElectricity + revenueFeedIn + revenueBaseFee + revenueSubsidy;
-    const cashflow = totalRevenue - economics.opexPerYear - currentInstallment;
+    const annualRoofRent = (economics.roofRentPerMonth ?? 0) * 12;
+    const totalOpex = economics.opexPerYear + annualRoofRent;
+    const cashflow = totalRevenue - totalOpex - currentInstallment;
 
     cumulativeCashflow += cashflow;
 
@@ -202,7 +204,7 @@ export function calculateEconomics(
       revenueBaseFee,
       revenueSubsidy,
       totalRevenue,
-      opex: economics.opexPerYear,
+      opex: totalOpex,
       loanInstallment: currentInstallment,
       interestPaid,
       principalPaid,
@@ -217,7 +219,8 @@ export function calculateEconomics(
   const totalLifetimeYield = energy.totalYieldKwh * calculationPeriodYears;
   let lcoe = 0;
   if (totalLifetimeYield > 0) {
-    const totalLifetimeOpex = economics.opexPerYear * calculationPeriodYears;
+    const totalLifetimeOpex =
+      (economics.opexPerYear + (economics.roofRentPerMonth ?? 0) * 12) * calculationPeriodYears;
     const totalCosts = economics.capex + totalLifetimeOpex + totalInterestPaid;
     lcoe = (totalCosts / totalLifetimeYield) * 100; // in Cent/kWh
   }
@@ -230,19 +233,12 @@ export function calculateEconomics(
     }
   }
 
-  // ROI: (Kumulierter Cashflow nach Betrachtungszeitraum / Eingesetztes EK) * 100
-  const equity = economics.capex - financing.loanAmount;
-  let roi = 0;
-  if (equity > 0) {
-    roi = (cashflowPlan[calculationPeriodYears - 1].cumulativeCashflow / equity) * 100;
-  } else if (equity === 0 && cashflowPlan[calculationPeriodYears - 1].cumulativeCashflow > 0) {
-    roi = Infinity; // Quasi unendlicher ROI bei Vollfinanzierung und positivem Überschuss
-  }
+  const accumulatedCashflow = cashflowPlan.reduce((sum, cf) => sum + cf.cashflow, 0);
 
   return {
     lcoe,
     amortizationYears,
-    roi,
+    accumulatedCashflow,
     cashflowPlan,
   };
 }
