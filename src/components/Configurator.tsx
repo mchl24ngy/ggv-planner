@@ -32,7 +32,9 @@ import {
   ChevronDown,
   Info,
   List,
+  FileDown,
 } from 'lucide-react';
+import { exportToPdf } from '../lib/pdfExport';
 
 export const Configurator: React.FC = () => {
   const { t, lang } = useLanguage();
@@ -86,11 +88,21 @@ export const Configurator: React.FC = () => {
   });
 
   const [expertMode, setExpertMode] = useState(false);
+  const [isPdfExporting, setIsPdfExporting] = useState(false);
 
   const handleExpertModeToggle = (enabled: boolean) => {
     setExpertMode(enabled);
     if (!enabled) {
       setSystem((s) => ({ ...s, inclination: 35, azimuth: 0 }));
+    }
+  };
+
+  const handleExportPdf = async () => {
+    setIsPdfExporting(true);
+    try {
+      await exportToPdf(system, consumption, economics, financing, energy, ecoResults, lang);
+    } finally {
+      setIsPdfExporting(false);
     }
   };
 
@@ -1045,10 +1057,24 @@ export const Configurator: React.FC = () => {
           {/* TAB 3: Results */}
           {activeTab === 3 && (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full flex flex-col">
-              <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <LineChart className="text-blue-500" />
-                {t.tab3Title}
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                  <LineChart className="text-blue-500" />
+                  {t.tab3Title}
+                </h2>
+                <button
+                  onClick={handleExportPdf}
+                  disabled={isPdfExporting || ecoResults.cashflowPlan.length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isPdfExporting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                  ) : (
+                    <FileDown size={16} />
+                  )}
+                  {isPdfExporting ? t.pdfExporting : t.btnExportPdf}
+                </button>
+              </div>
 
               {/* Optimization Panel */}
               <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-5">
@@ -1135,11 +1161,13 @@ export const Configurator: React.FC = () => {
 
               {ecoResults.cashflowPlan.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  <div className="lg:col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col items-center">
-                    <h3 className="font-semibold text-slate-700 mb-4 text-center">
-                      {t.chartEnergyTitle}
-                    </h3>
-                    <EnergyMixChart energy={energy} />
+                  <div id="pdf-chart-energy-col" className="lg:col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col items-center">
+                    <div id="pdf-chart-pie" className="w-full flex flex-col items-center">
+                      <h3 className="font-semibold text-slate-700 mb-4 text-center">
+                        {t.chartEnergyTitle}
+                      </h3>
+                      <EnergyMixChart energy={energy} />
+                    </div>
                     <div className="mt-4 text-sm text-slate-600 space-y-2 w-full px-4">
                       <div className="flex justify-between border-b border-slate-200 pb-1">
                         <span>{t.labelPvYield}</span>{' '}
@@ -1172,7 +1200,7 @@ export const Configurator: React.FC = () => {
                         {t.btnMonthlyDetail}
                       </button>
                     )}
-                    <div className="mt-6 w-full border-t border-slate-200 pt-4">
+                    <div id="pdf-chart-savings" className="mt-6 w-full border-t border-slate-200 pt-4">
                       <h3 className="font-semibold text-slate-700 mb-1 text-center text-sm">
                         {t.chartTenantSavingsTitle}
                       </h3>
@@ -1194,11 +1222,13 @@ export const Configurator: React.FC = () => {
                         String(economics.calculationPeriodYears)
                       )}
                     </h3>
-                    <CashflowChart
-                      data={ecoResults.cashflowPlan}
-                      selectedIndex={selectedYearIndex}
-                      onBarClick={(idx: number) => setSelectedYearIndex(idx)}
-                    />
+                    <div id="pdf-chart-cashflow">
+                      <CashflowChart
+                        data={ecoResults.cashflowPlan}
+                        selectedIndex={selectedYearIndex}
+                        onBarClick={(idx: number) => setSelectedYearIndex(idx)}
+                      />
+                    </div>
 
                     {ecoResults.cashflowPlan.length > 0 && (
                       <div className="mt-8 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -1373,7 +1403,7 @@ export const Configurator: React.FC = () => {
 
                 {monthlyFlows.length > 0 ? (
                   <>
-                    <div className="p-4">
+                    <div id="pdf-chart-monthly" className="p-4">
                       <MonthlyEnergyFlowChart data={monthlyFlows} />
                     </div>
 

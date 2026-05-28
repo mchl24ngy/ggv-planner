@@ -281,6 +281,10 @@ export const translations = {
     scenarioMinus50: '-50%',
     scenarioBase: 'Basis',
     scenarioPlus50: '+50%',
+
+    // PDF Export
+    btnExportPdf: 'PDF exportieren (beta)',
+    pdfExporting: 'PDF wird erstellt…',
   },
 
   en: {
@@ -563,6 +567,10 @@ export const translations = {
     scenarioMinus50: '-50%',
     scenarioBase: 'Base',
     scenarioPlus50: '+50%',
+
+    // PDF Export
+    btnExportPdf: 'Export PDF (beta)',
+    pdfExporting: 'Generating PDF…',
   },
 } as const;
 
