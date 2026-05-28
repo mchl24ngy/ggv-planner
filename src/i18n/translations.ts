@@ -59,11 +59,32 @@ export const translations = {
     labelPvCapacity: 'PV-Leistung (kWp)',
     tooltipPvCapacity:
       'Die installierte Peakleistung der PV-Anlage in Kilowatt-Peak. Ein typisches Mehrfamilienhaus hat 30–150 kWp.',
+    pvInputToggleKwp: 'kWp',
+    pvInputToggleSqm: 'm² Dachfläche',
+    labelRoofArea: 'Nutzbare Dachfläche (m²)',
+    tooltipRoofArea:
+      'Die für PV nutzbare Dachfläche. Daraus wird die Anlagenleistung berechnet: (m² ÷ 5) × 0,8 Nutzungsfaktor (basierend auf 200 Wp/m² Modulleistung und 80% Flächennutzung für Abstände, Verschattung etc.).',
+    pvCapacityFromArea: 'Berechnete Leistung: {kwp} kWp',
+    roofAreaMapsLink: 'Dachfläche in Google Maps ausmessen (Satellitenansicht)',
+
+    expertModeLabel: 'Expertenmodus (Dachneigung & Ausrichtung)',
+    tooltipExpertMode:
+      'Im Standardmodus werden Südausrichtung (0°) und ein Anstellwinkel von 35° angenommen – typische Werte für optimale Erträge in Mitteleuropa. Im Expertenmodus können diese Werte individuell angepasst werden.',
+    labelInclination: 'Neigungswinkel (°)',
+    tooltipInclination:
+      'Neigung der PV-Module zur Horizontalen. 0° = flach (Flachdach), 30–40° = optimal für Mitteleuropa, 90° = senkrecht (Fassade).',
+    labelAzimuth: 'Ausrichtung (Azimut)',
+    tooltipAzimuth:
+      'Himmelsrichtung der PV-Module. 0° = Süd (optimal), −90° = Ost, +90° = West. Abweichungen von Süd reduzieren den Jahresertrag.',
+    azimuthEast: 'Ost',
+    azimuthSouth: 'Süd',
+    azimuthWest: 'West',
+    expertModeDefault: 'Standard: Süd, 35°',
 
     labelBattery: 'Batteriespeicher',
     labelBatteryCapacity: 'kWh',
     tooltipBattery:
-      'Ein Batteriespeicher erhöht die Eigenverbrauchsquote erheblich, da überschüssiger PV-Strom gespeichert und nachts genutzt werden kann.',
+      'Ein Batteriespeicher erhöht die Eigenverbrauchsquote erheblich, da überschüssiger PV-Strom gespeichert und nachts genutzt werden kann. Faustformel istt: 0,5 kWh Speicher pro kWp PV-Leistung.',
 
     labelApartments: 'Wohneinheiten',
     tooltipApartments:
@@ -97,7 +118,7 @@ export const translations = {
     sectionModel: 'Betriebsmodell wählen',
     modelMieterstrom: 'Klassischer Mieterstrom',
     modelGGV: 'GGV (Gemeinschaftl. Gebäudeversorgung)',
-    sectionTariffs: 'Tarife & Fördersätze',
+    sectionTariffs: 'Stromtarife & Gebühren',
     sectionFinancing: 'Investition & Finanzierung',
 
     labelTenantRate: 'Netto-Verkaufspreis Mieter (ct)',
@@ -119,6 +140,10 @@ export const translations = {
     labelGridRate: 'Referenzpreis Netz (ct/kWh)',
     tooltipGridRate:
       'Lokaler Grundversorger-Tarif als Referenz. Dieser muss min. 10% über dem Verkaufspreis an Mieter liegen. Wird im Tool u.a. zur Berechnung der Mietereinsparungen verwendet.',
+
+    labelRoofRent: 'Dachpacht (€/Mo)',
+    tooltipRoofRent:
+      'Monatliche Pacht für die Nutzung des Daches. Preise je qm oder je kWp. Üblich sind Werte zwischen 50 ct und 1 € pro kWp. Da durch die PV-Anlage das Haus aufgewertet wird, wird das Dach von manchen Eigentümern auch kostenfrei überlassen.',
 
     labelCapex: 'Investmentkosten CAPEX (€ netto)',
     tooltipCapex:
@@ -316,11 +341,32 @@ export const translations = {
     labelPvCapacity: 'PV Capacity (kWp)',
     tooltipPvCapacity:
       'Installed peak power of the PV system in kilowatt-peak. A typical multi-family building has 30–150 kWp.',
+    pvInputToggleKwp: 'kWp',
+    pvInputToggleSqm: 'm² roof area',
+    labelRoofArea: 'Usable Roof Area (m²)',
+    tooltipRoofArea:
+      'The usable roof area for PV. System capacity is calculated as: (m² ÷ 5) × 0.8 usage factor (based on 200 Wp/m² module power and 80% area utilisation for spacing, shading, etc.).',
+    pvCapacityFromArea: 'Calculated capacity: {kwp} kWp',
+    roofAreaMapsLink: 'Measure roof area in Google Maps (satellite view)',
+
+    expertModeLabel: 'Expert mode (tilt & orientation)',
+    tooltipExpertMode:
+      'In standard mode, south orientation (0°) and a tilt of 35° are assumed – typical values for optimal yields in Central Europe. Expert mode lets you customise these values.',
+    labelInclination: 'Tilt angle (°)',
+    tooltipInclination:
+      'Tilt of the PV modules from horizontal. 0° = flat (flat roof), 30–40° = optimal for Central Europe, 90° = vertical (façade).',
+    labelAzimuth: 'Orientation (Azimuth)',
+    tooltipAzimuth:
+      'Cardinal direction the PV modules face. 0° = South (optimal), −90° = East, +90° = West. Deviations from South reduce annual yield.',
+    azimuthEast: 'East',
+    azimuthSouth: 'South',
+    azimuthWest: 'West',
+    expertModeDefault: 'Default: South, 35°',
 
     labelBattery: 'Battery Storage',
     labelBatteryCapacity: 'kWh',
     tooltipBattery:
-      'A battery storage significantly increases the self-consumption rate, as surplus PV energy can be stored and used at night.',
+      'A battery storage significantly increases the self-consumption rate, as surplus PV energy can be stored and used at night. Rule of thumb: 0.5 kWh storage per kWp of PV capacity.',
 
     labelApartments: 'Apartments',
     tooltipApartments:
@@ -353,7 +399,7 @@ export const translations = {
     sectionModel: 'Select Operating Model',
     modelMieterstrom: 'Classic Tenant Electricity',
     modelGGV: 'GGV (Communal Building Supply)',
-    sectionTariffs: 'Tariffs & Subsidies',
+    sectionTariffs: 'Tariffs & Fees',
     sectionFinancing: 'Investment & Financing',
 
     labelTenantRate: 'Net Tenant Sales Price (ct)',
@@ -375,6 +421,10 @@ export const translations = {
     labelGridRate: 'Grid Reference Price (ct/kWh)',
     tooltipGridRate:
       'Local utility tariff as a reference. It must be at least 10% above the tenant sales price. Used in the tool to calculate tenant savings, among other things.',
+
+    labelRoofRent: 'Roof Rent (€/mo)',
+    tooltipRoofRent:
+      'Monthly rent for roof usage. Prices per sqm or per kWp. Typical values are between 50 ct and €1 per kWp. Since the PV system adds value to the building, some owners provide the roof free of charge.',
 
     labelCapex: 'CAPEX (€ net)',
     tooltipCapex:

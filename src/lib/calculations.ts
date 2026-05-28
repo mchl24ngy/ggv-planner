@@ -191,7 +191,9 @@ export function calculateEconomics(
     }
 
     const totalRevenue = revenueTenantElectricity + revenueFeedIn + revenueBaseFee + revenueSubsidy;
-    const cashflow = totalRevenue - economics.opexPerYear - currentInstallment;
+    const annualRoofRent = (economics.roofRentPerMonth ?? 0) * 12;
+    const totalOpex = economics.opexPerYear + annualRoofRent;
+    const cashflow = totalRevenue - totalOpex - currentInstallment;
 
     cumulativeCashflow += cashflow;
 
@@ -202,7 +204,7 @@ export function calculateEconomics(
       revenueBaseFee,
       revenueSubsidy,
       totalRevenue,
-      opex: economics.opexPerYear,
+      opex: totalOpex,
       loanInstallment: currentInstallment,
       interestPaid,
       principalPaid,
@@ -217,7 +219,8 @@ export function calculateEconomics(
   const totalLifetimeYield = energy.totalYieldKwh * calculationPeriodYears;
   let lcoe = 0;
   if (totalLifetimeYield > 0) {
-    const totalLifetimeOpex = economics.opexPerYear * calculationPeriodYears;
+    const totalLifetimeOpex =
+      (economics.opexPerYear + (economics.roofRentPerMonth ?? 0) * 12) * calculationPeriodYears;
     const totalCosts = economics.capex + totalLifetimeOpex + totalInterestPaid;
     lcoe = (totalCosts / totalLifetimeYield) * 100; // in Cent/kWh
   }

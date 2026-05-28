@@ -30,6 +30,7 @@ export interface EconomicParams {
   feedInTariff: number; // EEG-Vergütung für Einspeisung (ct/kWh)
   tenantElectricitySubsidy: number; // Mieterstromzuschlag (variabel) (ct/kWh)
   baseFeePerMonth: number; // Grundgebühr pro Monat/WE (€)
+  roofRentPerMonth: number; // Monatliche Dachpacht (€)
   capex: number; // Investitionskosten (€)
   opexPerYear: number; // Jährliche Betriebskosten (€)
   calculationPeriodYears: number; // Betrachtungszeitraum in Jahren (z.B. 20)

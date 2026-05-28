@@ -39,7 +39,7 @@ const AppInner = () => {
           </a>
           <span className="text-slate-300">|</span>
           <a
-            href="https://schaeufler.net/michael"
+            href="https://schaeufler.net/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-800 transition-colors"

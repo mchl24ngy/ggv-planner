@@ -45,12 +45,12 @@ export const Configurator: React.FC = () => {
     address: 'Berlin, Germany',
     locationLat: 52.52,
     locationLon: 13.405,
-    inclination: 30,
+    inclination: 35,
     azimuth: 0,
     systemLoss: 14,
     pvCapacityKwp: 50,
     hasBattery: true,
-    batteryCapacityKwh: 20,
+    batteryCapacityKwh: 25,
   });
 
   const [consumption, setConsumption] = useState<ConsumptionParams>({
@@ -68,11 +68,12 @@ export const Configurator: React.FC = () => {
 
   const [economics, setEconomics] = useState<EconomicParams>({
     model: 'Mieterstrom',
-    tenantElectricityRate: 25,
+    tenantElectricityRate: 20,
     gridElectricityRate: 35,
     feedInTariff: 5,
     tenantElectricitySubsidy: 2.1,
     baseFeePerMonth: 10,
+    roofRentPerMonth: 50,
     capex: 75000,
     opexPerYear: 1500,
     calculationPeriodYears: 20,
@@ -83,6 +84,33 @@ export const Configurator: React.FC = () => {
     loanTermYears: 10,
     interestRate: 4.5,
   });
+
+  const [expertMode, setExpertMode] = useState(false);
+
+  const handleExpertModeToggle = (enabled: boolean) => {
+    setExpertMode(enabled);
+    if (!enabled) {
+      setSystem((s) => ({ ...s, inclination: 35, azimuth: 0 }));
+    }
+  };
+
+  const [pvInputMode, setPvInputMode] = useState<'kwp' | 'sqm'>('kwp');
+  // kWp = (m² / 5) * 0.8  →  m² = kWp / 0.8 * 5 = kWp * 6.25
+  const [roofAreaM2, setRoofAreaM2] = useState(Math.round(50 * 6.25));
+
+  const leanKwpFromArea = (m2: number) => Math.round((m2 / 5) * 0.8 * 10) / 10;
+
+  const handleRoofAreaChange = (m2: number) => {
+    setRoofAreaM2(m2);
+    setSystem((s) => ({ ...s, pvCapacityKwp: leanKwpFromArea(m2) }));
+  };
+
+  const handlePvModeSwitch = (mode: 'kwp' | 'sqm') => {
+    if (mode === 'sqm') {
+      setRoofAreaM2(Math.round(system.pvCapacityKwp * 6.25));
+    }
+    setPvInputMode(mode);
+  };
 
   const [loanPercentage, setLoanPercentage] = useState(Math.round((50000 / 75000) * 100));
 
@@ -282,26 +310,71 @@ export const Configurator: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="flex justify-between text-sm font-medium text-slate-700 mb-2">
-                      <span className="flex items-center">
-                        {t.labelPvCapacity}
-                        <Tooltip text={t.tooltipPvCapacity} />
+                    {/* Mode toggle */}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="flex items-center text-sm font-medium text-slate-700">
+                        {pvInputMode === 'kwp' ? t.labelPvCapacity : t.labelRoofArea}
+                        <Tooltip text={pvInputMode === 'kwp' ? t.tooltipPvCapacity : t.tooltipRoofArea} />
                       </span>
-                      <span className="text-blue-600 font-semibold">
-                        {system.pvCapacityKwp} kWp
-                      </span>
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="200"
-                      step="5"
-                      value={system.pvCapacityKwp}
-                      onChange={(e) =>
-                        setSystem({ ...system, pvCapacityKwp: Number(e.target.value) })
-                      }
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    />
+                      <div className="flex rounded-lg border border-slate-200 overflow-hidden text-xs font-medium">
+                        <button
+                          type="button"
+                          onClick={() => handlePvModeSwitch('kwp')}
+                          className={`px-2.5 py-1 transition-colors ${pvInputMode === 'kwp' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+                        >
+                          {t.pvInputToggleKwp}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handlePvModeSwitch('sqm')}
+                          className={`px-2.5 py-1 transition-colors ${pvInputMode === 'sqm' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+                        >
+                          {t.pvInputToggleSqm}
+                        </button>
+                      </div>
+                    </div>
+
+                    {pvInputMode === 'kwp' ? (
+                      <>
+                        <div className="flex justify-end mb-1">
+                          <span className="text-blue-600 font-semibold text-sm">{system.pvCapacityKwp} kWp</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="200"
+                          step="5"
+                          value={system.pvCapacityKwp}
+                          onChange={(e) =>
+                            setSystem({ ...system, pvCapacityKwp: Number(e.target.value) })
+                          }
+                          className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <input
+                          type="number"
+                          min="0"
+                          step="5"
+                          value={roofAreaM2}
+                          onChange={(e) => handleRoofAreaChange(Number(e.target.value))}
+                          className={inputClass}
+                        />
+                        <p className="text-xs text-blue-600 font-medium mt-1">
+                          {t.pvCapacityFromArea.replace('{kwp}', String(system.pvCapacityKwp))}
+                        </p>
+                        <a
+                          href={`https://www.google.com/maps/@${system.locationLat},${system.locationLon},19z/data=!3m1!1e3`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-blue-600 mt-1.5 hover:underline"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                          {t.roofAreaMapsLink}
+                        </a>
+                      </>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-3 pt-2 w-full">
@@ -337,6 +410,90 @@ export const Configurator: React.FC = () => {
                           className="w-20 px-3 py-1.5 border border-slate-200 rounded-lg text-sm outline-none focus:border-blue-500"
                         />
                         <span className="text-sm text-slate-600">{t.labelBatteryCapacity}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Expert mode toggle */}
+                  <div className="pt-1">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          className="sr-only"
+                          checked={expertMode}
+                          onChange={(e) => handleExpertModeToggle(e.target.checked)}
+                        />
+                        <div
+                          className={`block w-10 h-6 rounded-full transition-colors ${expertMode ? 'bg-blue-500' : 'bg-slate-300'}`}
+                        />
+                        <div
+                          className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${expertMode ? 'transform translate-x-4' : ''}`}
+                        />
+                      </div>
+                      <span className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                        {t.expertModeLabel}
+                        <Tooltip text={t.tooltipExpertMode} />
+                      </span>
+                    </label>
+
+                    {!expertMode && (
+                      <p className="text-xs text-slate-400 mt-1 ml-12">{t.expertModeDefault}</p>
+                    )}
+
+                    {expertMode && (
+                      <div className="mt-3 grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                        <div>
+                          <label className="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                            <span className="flex items-center">
+                              {t.labelInclination}
+                              <Tooltip text={t.tooltipInclination} />
+                            </span>
+                            <span className="text-blue-600 font-semibold">{system.inclination}°</span>
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="90"
+                            step="5"
+                            value={system.inclination}
+                            onChange={(e) =>
+                              setSystem({ ...system, inclination: Number(e.target.value) })
+                            }
+                            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                          />
+                          <div className="flex justify-between text-xs text-slate-400 mt-1">
+                            <span>0°</span>
+                            <span>45°</span>
+                            <span>90°</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                            <span className="flex items-center">
+                              {t.labelAzimuth}
+                              <Tooltip text={t.tooltipAzimuth} />
+                            </span>
+                            <span className="text-blue-600 font-semibold">{system.azimuth}°</span>
+                          </label>
+                          <input
+                            type="range"
+                            min="-90"
+                            max="90"
+                            step="5"
+                            value={system.azimuth}
+                            onChange={(e) =>
+                              setSystem({ ...system, azimuth: Number(e.target.value) })
+                            }
+                            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                          />
+                          <div className="flex justify-between text-xs text-slate-400 mt-1">
+                            <span>{t.azimuthEast}</span>
+                            <span>{t.azimuthSouth}</span>
+                            <span>{t.azimuthWest}</span>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -733,7 +890,24 @@ export const Configurator: React.FC = () => {
                           className={inputClassEco}
                         />
                       </div>
-                      <div></div>
+                      <div>
+                        <label className="flex items-center text-sm font-medium text-slate-700 mb-1">
+                          {t.labelRoofRent}
+                          <Tooltip text={t.tooltipRoofRent} />
+                        </label>
+                        <input
+                          type="number"
+                          step="1"
+                          value={economics.roofRentPerMonth}
+                          onChange={(e) =>
+                            setEconomics({
+                              ...economics,
+                              roofRentPerMonth: Number(e.target.value),
+                            })
+                          }
+                          className={inputClassEco}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
