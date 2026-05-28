@@ -285,6 +285,13 @@ export const translations = {
     // PDF Export
     btnExportPdf: 'PDF exportieren (beta)',
     pdfExporting: 'PDF wird erstellt…',
+
+    // JSON Export / Import
+    btnExportJson: 'Konfiguration exportieren',
+    btnImportJson: 'Konfiguration importieren',
+    jsonImportErrorInvalidJson: 'Die Datei konnte nicht gelesen werden. Bitte prüfen Sie, ob es sich um eine gültige JSON-Datei handelt.',
+    jsonImportErrorWrongAppId: 'Die hochgeladene Datei stammt nicht aus diesem Tool und kann nicht importiert werden.',
+    jsonImportSuccess: 'Konfiguration erfolgreich importiert.',
   },
 
   en: {
@@ -571,6 +578,13 @@ export const translations = {
     // PDF Export
     btnExportPdf: 'Export PDF (beta)',
     pdfExporting: 'Generating PDF…',
+
+    // JSON Export / Import
+    btnExportJson: 'Export configuration',
+    btnImportJson: 'Import configuration',
+    jsonImportErrorInvalidJson: 'The file could not be read. Please make sure it is a valid JSON file.',
+    jsonImportErrorWrongAppId: 'The uploaded file does not belong to this tool and cannot be imported.',
+    jsonImportSuccess: 'Configuration imported successfully.',
   },
 } as const;
 

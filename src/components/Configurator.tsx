@@ -33,8 +33,14 @@ import {
   Info,
   List,
   FileDown,
+  Upload,
+  Download,
+  CheckCircle,
+  AlertCircle,
 } from 'lucide-react';
 import { exportToPdf } from '../lib/pdfExport';
+import { exportToJson, importFromJson } from '../lib/jsonExport';
+import type { GgvPlannerExportUi } from '../lib/jsonExport';
 
 export const Configurator: React.FC = () => {
   const { t, lang } = useLanguage();
@@ -89,6 +95,58 @@ export const Configurator: React.FC = () => {
 
   const [expertMode, setExpertMode] = useState(false);
   const [isPdfExporting, setIsPdfExporting] = useState(false);
+
+  type JsonNotification = {
+    type: 'success' | 'error';
+    messageKey: 'jsonImportErrorInvalidJson' | 'jsonImportErrorWrongAppId' | 'jsonImportSuccess';
+  } | null;
+  const [jsonNotification, setJsonNotification] = useState<JsonNotification>(null);
+
+  const showJsonNotification = (
+    type: 'success' | 'error',
+    messageKey: 'jsonImportErrorInvalidJson' | 'jsonImportErrorWrongAppId' | 'jsonImportSuccess',
+  ) => {
+    setJsonNotification({ type, messageKey });
+    setTimeout(() => setJsonNotification(null), 4000);
+  };
+
+  const handleExportJson = () => {
+    const ui: GgvPlannerExportUi = { expertMode, pvInputMode, roofAreaM2 };
+    exportToJson(system, consumption, economics, financing, ui);
+  };
+
+  const handleImportJson = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const defaults: GgvPlannerExportUi = { expertMode, pvInputMode, roofAreaM2 };
+    const result = await importFromJson(file, {
+      system,
+      consumption,
+      economics,
+      financing,
+      ui: defaults,
+    });
+
+    if (!result.ok) {
+      showJsonNotification('error', result.errorKey === 'wrongAppId' ? 'jsonImportErrorWrongAppId' : 'jsonImportErrorInvalidJson');
+      return;
+    }
+
+    setSystem(result.system);
+    setConsumption(result.consumption);
+    setEconomics(result.economics);
+    setFinancing(result.financing);
+    setExpertMode(result.ui.expertMode);
+    setPvInputMode(result.ui.pvInputMode);
+    setRoofAreaM2(result.ui.roofAreaM2);
+    const newLoanPct = result.economics.capex > 0
+      ? Math.round((result.financing.loanAmount / result.economics.capex) * 100)
+      : 0;
+    setLoanPercentage(Math.min(100, Math.max(0, newLoanPct)));
+    showJsonNotification('success', 'jsonImportSuccess');
+  };
 
   const handleExpertModeToggle = (enabled: boolean) => {
     setExpertMode(enabled);
@@ -731,14 +789,51 @@ export const Configurator: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end mt-8">
-                <button
-                  onClick={() => setActiveTab(2)}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {t.btnNext}
-                  <ChevronRight size={18} />
-                </button>
+              <div className="mt-8 space-y-3">
+                {jsonNotification && (
+                  <div
+                    className={`flex items-center gap-2 text-sm px-4 py-2.5 rounded-lg border ${
+                      jsonNotification.type === 'success'
+                        ? 'bg-green-50 text-green-700 border-green-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
+                    }`}
+                  >
+                    {jsonNotification.type === 'success' ? (
+                      <CheckCircle size={16} />
+                    ) : (
+                      <AlertCircle size={16} />
+                    )}
+                    {t[jsonNotification.messageKey]}
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-600 font-medium rounded-lg hover:bg-slate-50 cursor-pointer transition-colors text-sm">
+                      <Upload size={16} />
+                      {t.btnImportJson}
+                      <input
+                        type="file"
+                        accept=".json"
+                        className="sr-only"
+                        onChange={handleImportJson}
+                      />
+                    </label>
+                    <button
+                      onClick={handleExportJson}
+                      className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition-colors text-sm"
+                    >
+                      <Download size={16} />
+                      {t.btnExportJson}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab(2)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {t.btnNext}
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -1042,14 +1137,51 @@ export const Configurator: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end mt-8">
-                <button
-                  onClick={() => setActiveTab(3)}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  {t.btnNext}
-                  <ChevronRight size={18} />
-                </button>
+              <div className="mt-8 space-y-3">
+                {jsonNotification && (
+                  <div
+                    className={`flex items-center gap-2 text-sm px-4 py-2.5 rounded-lg border ${
+                      jsonNotification.type === 'success'
+                        ? 'bg-green-50 text-green-700 border-green-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
+                    }`}
+                  >
+                    {jsonNotification.type === 'success' ? (
+                      <CheckCircle size={16} />
+                    ) : (
+                      <AlertCircle size={16} />
+                    )}
+                    {t[jsonNotification.messageKey]}
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-600 font-medium rounded-lg hover:bg-slate-50 cursor-pointer transition-colors text-sm">
+                      <Upload size={16} />
+                      {t.btnImportJson}
+                      <input
+                        type="file"
+                        accept=".json"
+                        className="sr-only"
+                        onChange={handleImportJson}
+                      />
+                    </label>
+                    <button
+                      onClick={handleExportJson}
+                      className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition-colors text-sm"
+                    >
+                      <Download size={16} />
+                      {t.btnExportJson}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab(3)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {t.btnNext}
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
               </div>
             </div>
           )}
