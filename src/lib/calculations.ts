@@ -233,19 +233,12 @@ export function calculateEconomics(
     }
   }
 
-  // ROI: (Kumulierter Cashflow nach Betrachtungszeitraum / Eingesetztes EK) * 100
-  const equity = economics.capex - financing.loanAmount;
-  let roi = 0;
-  if (equity > 0) {
-    roi = (cashflowPlan[calculationPeriodYears - 1].cumulativeCashflow / equity) * 100;
-  } else if (equity === 0 && cashflowPlan[calculationPeriodYears - 1].cumulativeCashflow > 0) {
-    roi = Infinity; // Quasi unendlicher ROI bei Vollfinanzierung und positivem Überschuss
-  }
+  const accumulatedCashflow = cashflowPlan.reduce((sum, cf) => sum + cf.cashflow, 0);
 
   return {
     lcoe,
     amortizationYears,
-    roi,
+    accumulatedCashflow,
     cashflowPlan,
   };
 }

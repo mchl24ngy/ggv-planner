@@ -15,7 +15,7 @@ export const translations = {
     kpiSelfConsumption: 'Eigenverbrauchsquote',
     kpiLcoe: 'Stromgestehungskosten',
     kpiAmortization: 'Amortisationszeit',
-    kpiRoi: 'Return on Investment',
+    kpiAccumulatedCashflow: 'Akkum. Einnahmen (20 J.)',
     kpiYears: 'Jahre',
     tooltipKpiYield:
       'Geschätze jährlicher PV-Bruttoertrag laut EU-Satellitendaten (PVGIS-Simulation). Abhängig von Standort, Anlagenleistung, Neigungswinkel und Systemverlusten.',
@@ -27,8 +27,8 @@ export const translations = {
       'Ermittelte Stromgestehungskosten: Gesamtkosten der Anlage über die Laufzeit (CAPEX + OPEX + Zinsen) dividiert durch die erzeugte Energiemenge.',
     tooltipKpiAmortization:
       'Jahr, in dem die Anlage abbezahlt ist (Break-Even-Punkt). Danach müssen nur noch die Betriebskosten (Software, Wartung) bezahlt werden, der Rest bleibt als Überschuss.',
-    tooltipKpiRoi:
-      'Zeigt die Rendite des eingesetzten Eigenkapitals. Gesamte Nettoeinnahmen über den Betrachtungszeitraum im Verhältnis zur Eigenkapitalinvestition (CAPEX − Kreditbetrag). ',
+    tooltipKpiAccumulatedCashflow:
+      'Summe aller jährlichen Cashflows vor Steuern über den gesamten Betrachtungszeitraum (20 Jahre). Entspricht den kumulierten Nettoeinnahmen nach Betriebskosten und Kreditdienst.',
 
     // Tabs
     tab1: '1. Technische Daten',
@@ -141,7 +141,7 @@ export const translations = {
     tooltipGridRate:
       'Lokaler Grundversorger-Tarif als Referenz. Dieser muss min. 10% über dem Verkaufspreis an Mieter liegen. Wird im Tool u.a. zur Berechnung der Mietereinsparungen verwendet.',
 
-    labelRoofRent: 'Dachpacht (€/Mo)',
+    labelRoofRent: 'mtl. Dachpacht (€)',
     tooltipRoofRent:
       'Monatliche Pacht für die Nutzung des Daches. Preise je qm oder je kWp. Üblich sind Werte zwischen 50 ct und 1 € pro kWp. Da durch die PV-Anlage das Haus aufgewertet wird, wird das Dach von manchen Eigentümern auch kostenfrei überlassen.',
 
@@ -297,7 +297,7 @@ export const translations = {
     kpiSelfConsumption: 'Self-consumption Rate',
     kpiLcoe: 'LCOE (Levelized Cost of Electricity)',
     kpiAmortization: 'Payback Period',
-    kpiRoi: 'ROI',
+    kpiAccumulatedCashflow: 'Accum. Revenue (20 Y.)',
     kpiYears: 'Years',
     tooltipKpiYield:
       'Estimated annual gross PV yield based on EU satellite data (PVGIS simulation). Depends on location, system capacity, tilt angle, and system losses.',
@@ -309,8 +309,8 @@ export const translations = {
       'Calculated Levelized Cost of Electricity: total system costs over its lifetime (CAPEX + OPEX + interest) divided by the total energy generated.',
     tooltipKpiAmortization:
       'The year in which the system is fully paid off (break-even point). After that, only operating costs (software, maintenance) need to be covered – the rest remains as surplus.',
-    tooltipKpiRoi:
-      'Return on Investment: total net revenue over the calculation period relative to the equity invested (CAPEX − loan amount). Indicates the return on equity.',
+    tooltipKpiAccumulatedCashflow:
+      'Sum of all annual pre-tax cashflows over the entire calculation period (20 years). Represents cumulative net revenue after operating costs and debt service.',
 
     // Tabs
     tab1: '1. Technical Data',
@@ -422,7 +422,7 @@ export const translations = {
     tooltipGridRate:
       'Local utility tariff as a reference. It must be at least 10% above the tenant sales price. Used in the tool to calculate tenant savings, among other things.',
 
-    labelRoofRent: 'Roof Rent (€/mo)',
+    labelRoofRent: 'monthly Roof Rent (€)',
     tooltipRoofRent:
       'Monthly rent for roof usage. Prices per sqm or per kWp. Typical values are between 50 ct and €1 per kWp. Since the PV system adds value to the building, some owners provide the roof free of charge.',
 

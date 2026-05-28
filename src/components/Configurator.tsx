@@ -153,7 +153,7 @@ export const Configurator: React.FC = () => {
   const [ecoResults, setEcoResults] = useState<EconomicResults>({
     lcoe: 0,
     amortizationYears: null,
-    roi: 0,
+    accumulatedCashflow: 0,
     cashflowPlan: [],
   });
 
@@ -1063,14 +1063,8 @@ export const Configurator: React.FC = () => {
                   const rateMin = Math.max(1, Math.round(rateBase * 0.5 * 2) / 2);
                   const rateMax = Math.round(rateBase * 1.5 * 2) / 2;
 
-                  // Batterie: min immer 0 (= kein Speicher), max +50% des konfigurierten Wertes
-                  const battBase = optimizationBase.hasBattery
-                    ? optimizationBase.batteryCapacityKwh
-                    : 20;
-                  const battMax = Math.max(30, Math.round((battBase * 1.5) / 5) * 5);
-
                   return (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Slider: Verkaufspreis */}
                       <div>
                         <label className="flex justify-between text-sm font-medium text-slate-700 mb-2">
@@ -1100,39 +1094,6 @@ export const Configurator: React.FC = () => {
                         <div className="flex justify-between text-xs text-slate-400 mt-1">
                           <span>{rateMin.toFixed(1)} ct (−50 %)</span>
                           <span>+50 % {rateMax.toFixed(1)} ct</span>
-                        </div>
-                      </div>
-
-                      {/* Slider: Batteriespeicher */}
-                      <div>
-                        <label className="flex justify-between text-sm font-medium text-slate-700 mb-2">
-                          <span className="flex items-center gap-1">
-                            <Battery size={14} />
-                            {t.labelOptBattery}
-                            <Tooltip text={t.tooltipOptBattery} />
-                          </span>
-                          <span className="text-green-700 font-semibold">
-                            {system.hasBattery && system.batteryCapacityKwh > 0
-                              ? `${system.batteryCapacityKwh} kWh`
-                              : t.noBattery}
-                          </span>
-                        </label>
-                        <input
-                          type="range"
-                          min="0"
-                          max={battMax}
-                          step="5"
-                          value={system.hasBattery ? system.batteryCapacityKwh : 0}
-                          onChange={(e) => {
-                            const val = Number(e.target.value);
-                            setSystem({ ...system, hasBattery: val > 0, batteryCapacityKwh: val });
-                          }}
-                          className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-green-600"
-                          style={{ background: '#bbf7d0' }}
-                        />
-                        <div className="flex justify-between text-xs text-slate-400 mt-1">
-                          <span>{t.noBattery}</span>
-                          <span>+50 % {battMax} kWh</span>
                         </div>
                       </div>
 

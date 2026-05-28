@@ -81,7 +81,7 @@ export interface YearlyCashflow {
 export interface EconomicResults {
   lcoe: number; // Stromgestehungskosten (€/kWh)
   amortizationYears: number | null; // Amortisationszeit in Jahren
-  roi: number; // Return on Investment in %
+  accumulatedCashflow: number; // Summe aller jährlichen Cashflows vor Steuern über den Betrachtungszeitraum
   cashflowPlan: YearlyCashflow[];
 }
 
