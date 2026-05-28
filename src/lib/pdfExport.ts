@@ -50,7 +50,7 @@ async function captureElement(id: string): Promise<Capture | null> {
   if (rect.width === 0 || rect.height === 0) return null;
   try {
     const canvas = await html2canvas(el, {
-      scale: 1.5,            // good sharpness; JPEG handles the rest
+      scale: 1.5, // good sharpness; JPEG handles the rest
       useCORS: true,
       backgroundColor: '#ffffff',
       logging: false,
@@ -69,14 +69,7 @@ async function captureElement(id: string): Promise<Capture | null> {
 // ─── Layout helpers ───────────────────────────────────────────────────────────
 
 /** Fit image in a box maintaining aspect ratio. Top-aligned, horizontally centred. */
-function fitImage(
-  pdf: jsPDF,
-  capture: Capture,
-  x: number,
-  y: number,
-  maxW: number,
-  maxH: number
-) {
+function fitImage(pdf: jsPDF, capture: Capture, x: number, y: number, maxW: number, maxH: number) {
   let w = maxW;
   let h = w / capture.ar;
   if (h > maxH) {
@@ -124,7 +117,10 @@ const HEAD_STYLE = {
 };
 const ROW_STYLE = { fontSize: 8.5, cellPadding: 2 };
 const ALT_ROW = { fillColor: [248, 250, 252] as [number, number, number] };
-const KEY_COL = { fontStyle: 'bold' as const, textColor: [71, 85, 105] as [number, number, number] };
+const KEY_COL = {
+  fontStyle: 'bold' as const,
+  textColor: [71, 85, 105] as [number, number, number],
+};
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
@@ -178,13 +174,28 @@ export async function exportToPdf(
       `${consumption.consumptionPerApartmentKwh.toLocaleString(loc)} kWh`,
     ],
     ...(consumption.hasHeatPump
-      ? [[isDE ? 'Wärmepumpe' : 'Heat Pump', `${consumption.heatPumpConsumptionKwh.toLocaleString(loc)} kWh`]]
+      ? [
+          [
+            isDE ? 'Wärmepumpe' : 'Heat Pump',
+            `${consumption.heatPumpConsumptionKwh.toLocaleString(loc)} kWh`,
+          ],
+        ]
       : []),
     ...(consumption.hasEvCharging
-      ? [[isDE ? 'E-Mobilität' : 'EV Charging', `${consumption.evChargingPoints} × ${consumption.evChargingConsumptionPerPointKwh.toLocaleString(loc)} kWh`]]
+      ? [
+          [
+            isDE ? 'E-Mobilität' : 'EV Charging',
+            `${consumption.evChargingPoints} × ${consumption.evChargingConsumptionPerPointKwh.toLocaleString(loc)} kWh`,
+          ],
+        ]
       : []),
     ...(consumption.hasGeneralConsumption
-      ? [[isDE ? 'Allgemeinstrom' : 'Common Area', `${consumption.generalConsumptionKwh.toLocaleString(loc)} kWh`]]
+      ? [
+          [
+            isDE ? 'Allgemeinstrom' : 'Common Area',
+            `${consumption.generalConsumptionKwh.toLocaleString(loc)} kWh`,
+          ],
+        ]
       : []),
   ];
 
@@ -199,22 +210,40 @@ export async function exportToPdf(
     columnStyles: { 0: KEY_COL },
   });
 
-  sectionLabel(pdf, isDE ? '2. Wirtschaftliche Daten' : '2. Economic Data', startY, M + HALF_W + COL_GAP);
+  sectionLabel(
+    pdf,
+    isDE ? '2. Wirtschaftliche Daten' : '2. Economic Data',
+    startY,
+    M + HALF_W + COL_GAP
+  );
 
   const modelLabel =
     economics.model === 'Mieterstrom'
-      ? isDE ? 'Klassischer Mieterstrom' : 'Classic Tenant Electricity'
-      : isDE ? 'GGV (Gemeinschaftl. Gebäudeversorgung)' : 'GGV (Communal Building Supply)';
+      ? isDE
+        ? 'Klassischer Mieterstrom'
+        : 'Classic Tenant Electricity'
+      : isDE
+        ? 'GGV (Gemeinschaftl. Gebäudeversorgung)'
+        : 'GGV (Communal Building Supply)';
 
   const econRows: string[][] = [
     [isDE ? 'Betriebsmodell' : 'Model', modelLabel],
-    [isDE ? 'Verkaufspreis Mieter' : 'Tenant Sales Price', `${economics.tenantElectricityRate} ct/kWh`],
-    [isDE ? 'Referenzpreis Netz' : 'Grid Reference Price', `${economics.gridElectricityRate} ct/kWh`],
+    [
+      isDE ? 'Verkaufspreis Mieter' : 'Tenant Sales Price',
+      `${economics.tenantElectricityRate} ct/kWh`,
+    ],
+    [
+      isDE ? 'Referenzpreis Netz' : 'Grid Reference Price',
+      `${economics.gridElectricityRate} ct/kWh`,
+    ],
     [isDE ? 'Einspeisevergütung' : 'Feed-in Tariff', `${economics.feedInTariff} ct/kWh`],
     ...(economics.model === 'Mieterstrom'
       ? [
           [isDE ? 'Grundgebühr' : 'Base Fee', `${economics.baseFeePerMonth} €/Mo.`],
-          [isDE ? 'Mieterstromzuschlag' : 'Tenant Elec. Subsidy', `${economics.tenantElectricitySubsidy} ct/kWh`],
+          [
+            isDE ? 'Mieterstromzuschlag' : 'Tenant Elec. Subsidy',
+            `${economics.tenantElectricitySubsidy} ct/kWh`,
+          ],
         ]
       : []),
     [isDE ? 'Monatl. Dachpacht' : 'Monthly Roof Rent', `${economics.roofRentPerMonth} €`],
@@ -222,8 +251,14 @@ export async function exportToPdf(
     ['OPEX', `${economics.opexPerYear.toLocaleString(loc)} €/${isDE ? 'Jahr' : 'Year'}`],
     [isDE ? 'Kreditbetrag' : 'Loan Amount', `${financing.loanAmount.toLocaleString(loc)} €`],
     [isDE ? 'Zinssatz' : 'Interest Rate', `${financing.interestRate} % p.a.`],
-    [isDE ? 'Kreditlaufzeit' : 'Loan Term', `${financing.loanTermYears} ${isDE ? 'Jahre' : 'Years'}`],
-    [isDE ? 'Betrachtungszeitraum' : 'Calc. Period', `${economics.calculationPeriodYears} ${isDE ? 'Jahre' : 'Years'}`],
+    [
+      isDE ? 'Kreditlaufzeit' : 'Loan Term',
+      `${financing.loanTermYears} ${isDE ? 'Jahre' : 'Years'}`,
+    ],
+    [
+      isDE ? 'Betrachtungszeitraum' : 'Calc. Period',
+      `${economics.calculationPeriodYears} ${isDE ? 'Jahre' : 'Years'}`,
+    ],
   ];
 
   autoTable(pdf, {
@@ -247,7 +282,14 @@ export async function exportToPdf(
 
     autoTable(pdf, {
       startY: kpiY + 3,
-      head: [[isDE ? 'Kennzahl' : 'KPI', isDE ? 'Wert' : 'Value', isDE ? 'Kennzahl' : 'KPI', isDE ? 'Wert' : 'Value']],
+      head: [
+        [
+          isDE ? 'Kennzahl' : 'KPI',
+          isDE ? 'Wert' : 'Value',
+          isDE ? 'Kennzahl' : 'KPI',
+          isDE ? 'Wert' : 'Value',
+        ],
+      ],
       body: [
         [
           isDE ? 'PV-Energieerzeugung' : 'PV Energy Generation',
@@ -265,7 +307,9 @@ export async function exportToPdf(
           isDE ? 'Amortisationszeit' : 'Payback Period',
           ecoResults.amortizationYears
             ? `${ecoResults.amortizationYears} ${isDE ? 'Jahre' : 'Years'}`
-            : isDE ? 'Außerhalb Zeitraum' : 'Outside period',
+            : isDE
+              ? 'Außerhalb Zeitraum'
+              : 'Outside period',
           isDE ? 'Akkum. Einnahmen' : 'Accum. Revenue',
           `${ecoResults.accumulatedCashflow.toLocaleString(loc, { maximumFractionDigits: 0 })} €`,
         ],
@@ -373,20 +417,22 @@ export async function exportToPdf(
   pageHeader(pdf, isDE ? 'Energiediagramme' : 'Energy Charts', 4, TOTAL, today);
 
   // Split vertically: top 60 % for the two energy charts, bottom 40 % for monthly
-  const topH = Math.round(CHART_H * 0.60); // ≈ 109 mm
-  const botH = CHART_H - topH - COL_GAP;   // ≈ 65 mm
+  const topH = Math.round(CHART_H * 0.6); // ≈ 109 mm
+  const botH = CHART_H - topH - COL_GAP; // ≈ 65 mm
 
-  const halfW = (CONTENT_W - COL_GAP) / 2;  // ≈ 130 mm each column
+  const halfW = (CONTENT_W - COL_GAP) / 2; // ≈ 130 mm each column
   const rightX = M + halfW + COL_GAP;
   const botY = CHART_TOP + topH + COL_GAP;
 
   // Labels
-  chartLabel(pdf, isDE ? 'Jahres-Energiebilanz' : 'Annual Energy Balance',
-    M + halfW / 2, CHART_TOP - 1);
-  chartLabel(pdf, isDE ? 'Mieter-Ersparnis' : 'Tenant Savings',
-    rightX + halfW / 2, CHART_TOP - 1);
-  chartLabel(pdf, isDE ? 'Monatliche Energieflüsse' : 'Monthly Energy Flows',
-    PAGE_W / 2, botY - 1);
+  chartLabel(
+    pdf,
+    isDE ? 'Jahres-Energiebilanz' : 'Annual Energy Balance',
+    M + halfW / 2,
+    CHART_TOP - 1
+  );
+  chartLabel(pdf, isDE ? 'Mieter-Ersparnis' : 'Tenant Savings', rightX + halfW / 2, CHART_TOP - 1);
+  chartLabel(pdf, isDE ? 'Monatliche Energieflüsse' : 'Monthly Energy Flows', PAGE_W / 2, botY - 1);
 
   if (pieCapture) {
     fitImage(pdf, pieCapture, M, CHART_TOP + 2, halfW, topH - 2);

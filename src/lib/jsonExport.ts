@@ -53,7 +53,7 @@ export function exportToJson(
   consumption: ConsumptionParams,
   economics: EconomicParams,
   financing: FinancingParams,
-  ui: GgvPlannerExportUi,
+  ui: GgvPlannerExportUi
 ): void {
   const payload: GgvPlannerExport = {
     _meta: {
@@ -96,7 +96,7 @@ export async function importFromJson(
     economics: EconomicParams;
     financing: FinancingParams;
     ui: GgvPlannerExportUi;
-  },
+  }
 ): Promise<ImportResult> {
   let raw: string;
   try {

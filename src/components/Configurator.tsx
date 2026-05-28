@@ -104,7 +104,7 @@ export const Configurator: React.FC = () => {
 
   const showJsonNotification = (
     type: 'success' | 'error',
-    messageKey: 'jsonImportErrorInvalidJson' | 'jsonImportErrorWrongAppId' | 'jsonImportSuccess',
+    messageKey: 'jsonImportErrorInvalidJson' | 'jsonImportErrorWrongAppId' | 'jsonImportSuccess'
   ) => {
     setJsonNotification({ type, messageKey });
     setTimeout(() => setJsonNotification(null), 4000);
@@ -130,7 +130,12 @@ export const Configurator: React.FC = () => {
     });
 
     if (!result.ok) {
-      showJsonNotification('error', result.errorKey === 'wrongAppId' ? 'jsonImportErrorWrongAppId' : 'jsonImportErrorInvalidJson');
+      showJsonNotification(
+        'error',
+        result.errorKey === 'wrongAppId'
+          ? 'jsonImportErrorWrongAppId'
+          : 'jsonImportErrorInvalidJson'
+      );
       return;
     }
 
@@ -141,9 +146,10 @@ export const Configurator: React.FC = () => {
     setExpertMode(result.ui.expertMode);
     setPvInputMode(result.ui.pvInputMode);
     setRoofAreaM2(result.ui.roofAreaM2);
-    const newLoanPct = result.economics.capex > 0
-      ? Math.round((result.financing.loanAmount / result.economics.capex) * 100)
-      : 0;
+    const newLoanPct =
+      result.economics.capex > 0
+        ? Math.round((result.financing.loanAmount / result.economics.capex) * 100)
+        : 0;
     setLoanPercentage(Math.min(100, Math.max(0, newLoanPct)));
     showJsonNotification('success', 'jsonImportSuccess');
   };
@@ -384,7 +390,9 @@ export const Configurator: React.FC = () => {
                     <div className="flex items-center justify-between mb-2">
                       <span className="flex items-center text-sm font-medium text-slate-700">
                         {pvInputMode === 'kwp' ? t.labelPvCapacity : t.labelRoofArea}
-                        <Tooltip text={pvInputMode === 'kwp' ? t.tooltipPvCapacity : t.tooltipRoofArea} />
+                        <Tooltip
+                          text={pvInputMode === 'kwp' ? t.tooltipPvCapacity : t.tooltipRoofArea}
+                        />
                       </span>
                       <div className="flex rounded-lg border border-slate-200 overflow-hidden text-xs font-medium">
                         <button
@@ -407,7 +415,9 @@ export const Configurator: React.FC = () => {
                     {pvInputMode === 'kwp' ? (
                       <>
                         <div className="flex justify-end mb-1">
-                          <span className="text-blue-600 font-semibold text-sm">{system.pvCapacityKwp} kWp</span>
+                          <span className="text-blue-600 font-semibold text-sm">
+                            {system.pvCapacityKwp} kWp
+                          </span>
                         </div>
                         <input
                           type="range"
@@ -440,7 +450,21 @@ export const Configurator: React.FC = () => {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-blue-600 mt-1.5 hover:underline"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M15 3h6v6" />
+                            <path d="M10 14 21 3" />
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                          </svg>
                           {t.roofAreaMapsLink}
                         </a>
                       </>
@@ -519,7 +543,9 @@ export const Configurator: React.FC = () => {
                               {t.labelInclination}
                               <Tooltip text={t.tooltipInclination} />
                             </span>
-                            <span className="text-blue-600 font-semibold">{system.inclination}°</span>
+                            <span className="text-blue-600 font-semibold">
+                              {system.inclination}°
+                            </span>
                           </label>
                           <input
                             type="range"
@@ -1293,7 +1319,10 @@ export const Configurator: React.FC = () => {
 
               {ecoResults.cashflowPlan.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  <div id="pdf-chart-energy-col" className="lg:col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col items-center">
+                  <div
+                    id="pdf-chart-energy-col"
+                    className="lg:col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col items-center"
+                  >
                     <div id="pdf-chart-pie" className="w-full flex flex-col items-center">
                       <h3 className="font-semibold text-slate-700 mb-4 text-center">
                         {t.chartEnergyTitle}
@@ -1332,7 +1361,10 @@ export const Configurator: React.FC = () => {
                         {t.btnMonthlyDetail}
                       </button>
                     )}
-                    <div id="pdf-chart-savings" className="mt-6 w-full border-t border-slate-200 pt-4">
+                    <div
+                      id="pdf-chart-savings"
+                      className="mt-6 w-full border-t border-slate-200 pt-4"
+                    >
                       <h3 className="font-semibold text-slate-700 mb-1 text-center text-sm">
                         {t.chartTenantSavingsTitle}
                       </h3>
