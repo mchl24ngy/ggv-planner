@@ -1,4 +1,4 @@
-# ggv-planner - Mieterstrom & GGV Konfigurator
+# Immo PV Planer - Mieterstrom & GGV Konfigurator
 
 [Deutsch](#deutsch) | [English](#english)
 
@@ -14,7 +14,7 @@ Meine Motivation für dieses Projekt ist es, Transparenz in ein Thema zu bringen
 
 Es gibt es bereits einige Anbieter am Markt, über die auch Wirtschaftlichkeitsberechnungen für Mieterstrom durchgeführt werden, doch die zugrunde liegenden Zahlen und Rechenwege sind oft eine "Blackbox". Es nicht nachvollziehbar, ob Ergebnisse geschönt und Projekte primär zum Vorteil der Anbieter "reich gerechnet" werden. Das möchte ich mit diesem Online-Rechner ändern.
 
-**ggv-planner** ist meine Antwort darauf:
+**Immo PV Planer** ist meine Antwort darauf:
 
 - **Unabhängigkeit:** Ein neutrales Werkzeug ohne Verkaufsabsichten.
 - **Transparenz:** Dank Open Source sind alle Kalkulationen für jeden einsehbar und nachprüfbar.

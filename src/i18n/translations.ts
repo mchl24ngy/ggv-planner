@@ -3,10 +3,10 @@ export type Lang = 'de' | 'en';
 export const translations = {
   de: {
     // App header
-    appTitle: 'Mieterstrom & GGV Planner',
+    appTitle: 'Immo PV Planer',
     appSubtitle: 'Interaktives Simulationsmodell für Immobilien',
     openSource: 'Open Source',
-    projectOnGithub: 'GGV-Planner @ Github',
+    projectOnGithub: 'Immo PV Planer @ Github',
     myWebsite: 'Meine Website',
 
     // KPI Labels
@@ -298,10 +298,10 @@ export const translations = {
 
   en: {
     // App header
-    appTitle: 'Tenant Electricity & GGV Planner',
+    appTitle: 'Immo PV Planner',
     appSubtitle: 'Interactive simulation model for real estate',
     openSource: 'Open Source',
-    projectOnGithub: 'GGV-Planner @ Github',
+    projectOnGithub: 'Immo PV Planer @ Github',
     myWebsite: 'My Website',
 
     // KPI Labels

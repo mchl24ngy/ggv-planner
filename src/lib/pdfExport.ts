@@ -87,7 +87,7 @@ function pageHeader(pdf: jsPDF, title: string, page: number, total: number, date
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(8.5);
   pdf.setTextColor(255, 255, 255);
-  pdf.text('Mieterstrom & GGV Planner', M, 6.5);
+  pdf.text('Immo PV Planer', M, 6.5);
   pdf.text(title, PAGE_W / 2, 6.5, { align: 'center' });
   pdf.text(`${date} | ${page}/${total}`, PAGE_W - M, 6.5, { align: 'right' });
   pdf.setTextColor(30, 41, 59);
