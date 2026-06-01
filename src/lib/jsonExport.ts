@@ -1,6 +1,6 @@
 import type { SystemParams, ConsumptionParams, EconomicParams, FinancingParams } from '../types';
 
-const APP_ID = 'ggv-planner';
+const APP_ID = 'Immo PV Planer';
 const SCHEMA_VERSION = '1';
 
 function buildFilename(address: string, ext: string): string {
