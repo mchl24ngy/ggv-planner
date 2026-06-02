@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   SystemParams,
   ConsumptionParams,
@@ -37,9 +37,13 @@ import {
   Download,
   CheckCircle,
   AlertCircle,
+  HelpCircle,
 } from 'lucide-react';
 import { exportToJson, importFromJson } from '../lib/jsonExport';
 import type { GgvPlannerExportUi } from '../lib/jsonExport';
+import { WelcomeModal } from './WelcomeModal';
+import { TutorialWalkthrough, EVENTS, STATUS, ACTIONS } from './TutorialWalkthrough';
+import type { EventData, Controls } from './TutorialWalkthrough';
 
 export const Configurator: React.FC = () => {
   const { t, lang } = useLanguage();
@@ -94,6 +98,14 @@ export const Configurator: React.FC = () => {
 
   const [expertMode, setExpertMode] = useState(false);
   const [isPdfExporting, setIsPdfExporting] = useState(false);
+
+  // Tutorial state
+  const [showWelcomeModal, setShowWelcomeModal] = useState(
+    () => localStorage.getItem('ggv-tutorial-dismissed') !== 'true'
+  );
+  const [tutorialRunning, setTutorialRunning] = useState(false);
+  const [tutorialStepIndex, setTutorialStepIndex] = useState(0);
+  const pendingStepRef = useRef<number | null>(null);
 
   type JsonNotification = {
     type: 'success' | 'error';
@@ -288,6 +300,60 @@ export const Configurator: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
+  // Resume tutorial after tab change (needed when navigating to Tab 3 for the results step)
+  useEffect(() => {
+    if (pendingStepRef.current !== null) {
+      const nextStep = pendingStepRef.current;
+      pendingStepRef.current = null;
+      const timer = setTimeout(() => {
+        setTutorialStepIndex(nextStep);
+        setTutorialRunning(true);
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab]);
+
+  const startTutorial = () => {
+    setActiveTab(1);
+    setTutorialStepIndex(0);
+    setTutorialRunning(true);
+    setShowWelcomeModal(false);
+    localStorage.setItem('ggv-tutorial-dismissed', 'true');
+  };
+
+  const dismissTutorial = () => {
+    setShowWelcomeModal(false);
+    localStorage.setItem('ggv-tutorial-dismissed', 'true');
+  };
+
+  const handleTutorialCallback = (data: EventData, controls: Controls) => {
+    const { action, index, status, type } = data;
+
+    if (type === EVENTS.STEP_AFTER) {
+      const isForward = action === ACTIONS.NEXT || action === ACTIONS.START;
+      if (isForward && index === 4) {
+        // After Tab2-sidebar step: navigate to Tab 3, pause, then resume at results step
+        setTutorialRunning(false);
+        pendingStepRef.current = 5;
+        setActiveTab(3);
+      } else if (!isForward && index === 5) {
+        // Going back from results step to Tab2-sidebar step
+        setTutorialRunning(false);
+        pendingStepRef.current = 4;
+        setActiveTab(1);
+      } else {
+        setTutorialStepIndex(index + (isForward ? 1 : -1));
+      }
+    }
+
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+      setTutorialRunning(false);
+      setTutorialStepIndex(0);
+      // Suppress unused-variable warning for controls in terminal states
+      void controls;
+    }
+  };
+
   const inputClass =
     'w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white transition-colors outline-none focus:border-blue-500';
   const inputClassEco =
@@ -295,6 +361,13 @@ export const Configurator: React.FC = () => {
 
   return (
     <div className="w-full">
+      {showWelcomeModal && <WelcomeModal onStart={startTutorial} onSkip={dismissTutorial} />}
+      <TutorialWalkthrough
+        run={tutorialRunning}
+        stepIndex={tutorialStepIndex}
+        onCallback={handleTutorialCallback}
+      />
+
       {/* Header / KPIs */}
       <KPIDisplay energy={energy} economics={ecoResults} />
 
@@ -311,6 +384,7 @@ export const Configurator: React.FC = () => {
           </button>
 
           <button
+            data-tutorial="tab2-sidebar-button"
             onClick={() => setActiveTab(2)}
             className={`flex-1 md:flex-none flex items-center gap-3 p-4 md:px-6 md:py-5 text-left transition-colors font-medium text-sm ${activeTab === 2 ? 'bg-blue-50 text-blue-700 border-b-2 md:border-b-0 md:border-r-2 border-blue-600' : 'text-slate-600 hover:bg-slate-100'}`}
           >
@@ -324,6 +398,16 @@ export const Configurator: React.FC = () => {
           >
             <LineChart size={20} className={activeTab === 3 ? 'text-blue-600' : 'text-slate-400'} />
             <span className="hidden md:block">{t.tab3}</span>
+          </button>
+
+          {/* Restart tutorial button */}
+          <button
+            onClick={startTutorial}
+            title={t.tutorialBtnRestart}
+            className="hidden md:flex items-center gap-2 mt-auto px-6 py-4 text-slate-400 hover:text-blue-500 transition-colors text-xs font-medium border-t border-slate-200"
+          >
+            <HelpCircle size={16} />
+            <span>{t.tutorialBtnRestart}</span>
           </button>
         </div>
 
@@ -366,7 +450,7 @@ export const Configurator: React.FC = () => {
                     {t.sectionPV}
                   </h3>
 
-                  <div>
+                  <div data-tutorial="address-input">
                     <label className="flex items-center text-sm font-medium text-slate-700 mb-1">
                       {t.labelAddress}
                       <Tooltip text={t.tooltipAddress} />
@@ -471,7 +555,10 @@ export const Configurator: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 pt-2 w-full">
+                  <div
+                    data-tutorial="battery-section"
+                    className="flex items-center gap-3 pt-2 w-full"
+                  >
                     <label className="flex items-center gap-2 cursor-pointer flex-1">
                       <div className="relative">
                         <input
@@ -487,7 +574,10 @@ export const Configurator: React.FC = () => {
                           className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${system.hasBattery ? 'transform translate-x-4' : ''}`}
                         ></div>
                       </div>
-                      <span className="text-sm font-medium text-slate-700 flex items-center gap-1">
+                      <span
+                        data-tutorial="battery-tooltip"
+                        className="text-sm font-medium text-slate-700 flex items-center gap-1"
+                      >
                         <Battery size={16} /> {t.labelBattery}
                         <Tooltip text={t.tooltipBattery} />
                       </span>
@@ -853,6 +943,7 @@ export const Configurator: React.FC = () => {
                     </button>
                   </div>
                   <button
+                    data-tutorial="next-button-tab1"
                     onClick={() => setActiveTab(2)}
                     className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
                   >
@@ -1214,7 +1305,10 @@ export const Configurator: React.FC = () => {
 
           {/* TAB 3: Results */}
           {activeTab === 3 && (
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full flex flex-col">
+            <div
+              data-tutorial="results-section"
+              className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full flex flex-col"
+            >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
                   <LineChart className="text-blue-500" />

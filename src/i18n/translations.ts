@@ -294,6 +294,42 @@ export const translations = {
     jsonImportErrorWrongAppId:
       'Die hochgeladene Datei stammt nicht aus diesem Tool und kann nicht importiert werden.',
     jsonImportSuccess: 'Konfiguration erfolgreich importiert.',
+
+    // Tutorial
+    tutorialWelcomeTitle: 'Willkommen beim Immo PV Planer!',
+    tutorialWelcomeText:
+      'Möchten Sie eine kurze Einführung in die wichtigsten Funktionen erhalten?',
+    tutorialBtnStart: 'Tour starten',
+    tutorialBtnSkip: 'Direkt starten',
+    tutorialBtnRestart: 'Tour wiederholen',
+    tutorialLocaleBack: 'Zurück',
+    tutorialLocaleClose: 'Schließen',
+    tutorialLocaleLast: 'Fertig',
+    tutorialLocaleNext: 'Weiter',
+    tutorialLocaleOpen: 'Tour öffnen',
+    tutorialLocaleSkip: 'Überspringen',
+
+    tutorialStep1Title: 'Standort eingeben',
+    tutorialStep1Content:
+      'Geben Sie hier die Adresse des Gebäudes ein. Für den Standort wird der jährlichen PV-Ertrags ermittelt.',
+    tutorialStep2Title: 'Batteriespeicher konfigurieren',
+    tutorialStep2Content:
+      'Geben Sie die Werte ein, wenn Sie sie haben. Sie können aber auch erst einmal die Standardwerte verwenden, die bereits ausgefüllt sind.',
+    tutorialStep3Title: 'Info-Tooltips nutzen',
+    tutorialStep3Content:
+      'Diese kleinen (i)-Icons erklären jeden Parameter im Detail. Fahren Sie mit der Maus darüber, um mehr Informationen zu erhalten.',
+    tutorialStep4Title: 'Weiter zum nächsten Bereich',
+    tutorialStep4Content:
+      'Mit dem Weiter-Button gelangen Sie zum nächsten Tab. Alle Eingaben werden sofort neu berechnet. Sie können links über die drei Tabs jederzeit frei zwischen den Bereichen wechseln.',
+    tutorialStep5Title: 'Freie Navigation zwischen Bereichen',
+    tutorialStep5Content:
+      'Über die linke Seitenleiste können Sie jederzeit direkt zwischen den drei Bereichen wechseln: Technische Daten, Wirtschaftliche Daten und Ergebnisse.',
+    tutorialStep6Title: 'Ergebnisse & Analyse',
+    tutorialStep6Content:
+      'Hier sehen Sie alle Ergebnisse auf einen Blick: Energiemix, Cashflow-Entwicklung, Mietereinsparungen und monatliche Energieflüsse. Alle Diagramme aktualisieren sich automatisch bei jeder Eingabeänderung.',
+    tutorialStep7Title: 'Projekt-KPIs auf einen Blick',
+    tutorialStep7Content:
+      'Die KPI-Leiste zeigt die sechs wichtigsten Kennzahlen dauerhaft: PV-Ertrag, Autarkiegrad, Eigenverbrauchsquote, Stromgestehungskosten, Amortisationszeit und kumulierte Einnahmen über 20 Jahre.',
   },
 
   en: {
@@ -589,6 +625,41 @@ export const translations = {
     jsonImportErrorWrongAppId:
       'The uploaded file does not belong to this tool and cannot be imported.',
     jsonImportSuccess: 'Configuration imported successfully.',
+
+    // Tutorial
+    tutorialWelcomeTitle: 'Welcome to Immo PV Planner!',
+    tutorialWelcomeText: 'Would you like a quick introduction to the key features?',
+    tutorialBtnStart: 'Start Tour',
+    tutorialBtnSkip: 'Skip Tour',
+    tutorialBtnRestart: 'Restart Tour',
+    tutorialLocaleBack: 'Back',
+    tutorialLocaleClose: 'Close',
+    tutorialLocaleLast: 'Done',
+    tutorialLocaleNext: 'Next',
+    tutorialLocaleOpen: 'Open tour',
+    tutorialLocaleSkip: 'Skip',
+
+    tutorialStep1Title: 'Enter Location',
+    tutorialStep1Content:
+      'Enter the building address here. GPS coordinates are automatically determined and used for the PVGIS simulation of the annual PV yield.',
+    tutorialStep2Title: 'Configure Battery Storage',
+    tutorialStep2Content:
+      'Enable battery storage and adjust the capacity. Default values are pre-filled. Rule of thumb: 0.5 kWh storage per kWp of PV capacity.',
+    tutorialStep3Title: 'Use Info Tooltips',
+    tutorialStep3Content:
+      'These small (i) icons explain each parameter in detail. Hover over them to get more information.',
+    tutorialStep4Title: 'Continue to Next Section',
+    tutorialStep4Content:
+      'Use the Next button to move to the next tab. All inputs are recalculated immediately. You can also switch freely between sections at any time.',
+    tutorialStep5Title: 'Free Navigation Between Sections',
+    tutorialStep5Content:
+      'Use the left sidebar to switch directly between the three sections at any time: Technical Data, Economic Data, and Results.',
+    tutorialStep6Title: 'Results & Analysis',
+    tutorialStep6Content:
+      'See all results at a glance: energy mix, cashflow development, tenant savings, and monthly energy flows. All charts update automatically with every input change.',
+    tutorialStep7Title: 'Project KPIs at a Glance',
+    tutorialStep7Content:
+      'The KPI bar permanently shows the six key metrics: PV yield, autarky rate, self-consumption rate, LCOE, amortization period, and cumulative revenue over 20 years.',
   },
 } as const;
 
