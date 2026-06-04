@@ -51,6 +51,8 @@ Das Tool vergleicht zwei wesentliche Modelle:
 
 Detaillierte Informationen zu Umgebungsvariablen und Deployment (Netlify, Vercel, Nginx) findest du in der [Deployment-Dokumentation](docu/deployment.md).
 
+Die Berechnungslogik ist mit **[Vitest](https://vitest.dev/)** durch automatisierte Tests abgesichert (`npm test`). Details zur Teststruktur und -ausführung findest du in der [Deployment-Dokumentation](docu/deployment.md).
+
 ---
 
 <a name="english"></a>
@@ -99,6 +101,8 @@ The tool distinguishes between two primary models in Germany:
 4. **Run App**: `npm run dev`
 
 For details on environment variables and deployment options (Netlify, Vercel, Nginx) see the [Deployment Documentation](docu/deployment.md).
+
+The calculation logic is covered by automated tests using **[Vitest](https://vitest.dev/)** (`npm test`). For details on test structure and how to run them, see the [Deployment Documentation](docu/deployment.md).
 
 ---
 
