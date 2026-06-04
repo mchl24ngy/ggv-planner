@@ -9,13 +9,30 @@
 
 ### Umgebungsvariablen
 
-Lege eine `.env`-Datei im Projektstammverzeichnis an (Vorlage: `.env.example`, falls vorhanden):
+Lege eine `.env`-Datei im Projektstammverzeichnis an (Vorlage: `.env_example`):
 
 | Variable | Pflicht | Beschreibung |
 |---|---|---|
 | `VITE_PVGIS_BASE_URL` | Nein | Basis-URL für die PVGIS-API. Standard: `/pvgis-api/api/v5_2` (geht durch den konfigurierten Proxy) |
+| `VITE_FORMBRICKS_WORKSPACE_ID` | Nein | Workspace-ID aus dem Formbricks-Dashboard. Aktiviert den „Feedback & Support"-Button in der Sidebar. Ohne diese Variable bleibt der Button stumm. |
 
 > Die Adress-Autovervollständigung nutzt [Photon (Komoot)](https://photon.komoot.io/) auf Basis von OpenStreetMap – kein API-Key notwendig.
+
+#### Formbricks einrichten (optional)
+
+[Formbricks](https://formbricks.com/) ermöglicht In-App-Umfragen, die über einen Button in der Sidebar geöffnet werden können.
+
+**Schritte:**
+
+1. Konto bei [app.formbricks.com](https://app.formbricks.com) anlegen (kostenloser Cloud-Plan verfügbar)
+2. Eine **App Survey** erstellen (Typ: *App Survey*, nicht *Link Survey*)
+3. Als Auslöser einen **Code-Trigger** mit dem Event-Schlüssel `support` konfigurieren
+4. Survey auf **Live** schalten
+5. Die **Workspace-ID** unter *Settings → General* kopieren
+6. In `.env` eintragen: `VITE_FORMBRICKS_WORKSPACE_ID=<deine-id>`
+7. Für Netlify: Variable zusätzlich unter *Site settings → Environment variables* setzen
+
+> Ist `VITE_FORMBRICKS_WORKSPACE_ID` nicht gesetzt, wird Formbricks nicht initialisiert – das App-Verhalten ändert sich nicht.
 
 #### Hinweis zur PVGIS-API
 
@@ -131,13 +148,30 @@ npm run check-all  # Alle Prüfungen abschließend ausführen
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root (template: `.env_example`):
 
 | Variable | Required | Description |
 |---|---|---|
 | `VITE_PVGIS_BASE_URL` | No | Base URL for the PVGIS API. Default: `/pvgis-api/api/v5_2` (routed through the configured proxy) |
+| `VITE_FORMBRICKS_WORKSPACE_ID` | No | Workspace ID from the Formbricks dashboard. Enables the "Feedback & Support" button in the sidebar. Without this variable the button is a no-op. |
 
 > Address autocomplete uses [Photon (Komoot)](https://photon.komoot.io/) powered by OpenStreetMap — no API key required.
+
+#### Setting up Formbricks (optional)
+
+[Formbricks](https://formbricks.com/) provides in-app surveys that can be opened via a button in the sidebar.
+
+**Steps:**
+
+1. Create an account at [app.formbricks.com](https://app.formbricks.com) (free cloud plan available)
+2. Create an **App Survey** (type: *App Survey*, not *Link Survey*)
+3. Add a **Code trigger** with the event key `support`
+4. Set the survey status to **Live**
+5. Copy the **Workspace ID** from *Settings → General*
+6. Add to `.env`: `VITE_FORMBRICKS_WORKSPACE_ID=<your-id>`
+7. For Netlify: also add the variable under *Site settings → Environment variables*
+
+> If `VITE_FORMBRICKS_WORKSPACE_ID` is not set, Formbricks is not initialized — the app behaviour is unchanged.
 
 #### Note on the PVGIS API
 

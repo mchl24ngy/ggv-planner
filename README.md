@@ -40,6 +40,7 @@ Das Tool vergleicht zwei wesentliche Modelle:
 - **Styling:** Tailwind CSS
 - **Charts:** Recharts zur Visualisierung von Cashflows und Energieflüssen
 - **APIs:** Integration von nötigen APIs für standortgenaue Ertragsdaten, aktuell PVGIS der EU sowie Photon (Komoot/OpenStreetMap) für die Adresszuordnung – kein API-Key erforderlich.
+- **Support:** [Formbricks](https://formbricks.com/) – optionale In-App-Umfragen und Feedback-Formulare, konfigurierbar über eine Umgebungsvariable.
 
 ## 🔧 Installation & Setup
 
@@ -88,6 +89,7 @@ The tool distinguishes between two primary models in Germany:
 - **Styling:** Tailwind CSS
 - **Charts:** Recharts for visualizing energy flows and financial forecasts
 - **APIs:** Integration of necessary APIs for location-specific yield data, currently PVGIS from the EU and Photon (Komoot/OpenStreetMap) for address autocomplete – no API key required.
+- **Support:** [Formbricks](https://formbricks.com/) – optional in-app surveys and feedback forms, configurable via an environment variable.
 
 ## 🔧 Installation & Setup
 
