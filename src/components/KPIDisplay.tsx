@@ -12,7 +12,10 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics }) => 
   const { t } = useLanguage();
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+    <div
+      data-tutorial="kpi-display"
+      className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6"
+    >
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
         <span className="text-sm font-medium text-slate-500 mb-1 flex items-center">
           {t.kpiYield}

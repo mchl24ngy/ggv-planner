@@ -40,6 +40,7 @@ Das Tool vergleicht zwei wesentliche Modelle:
 - **Styling:** Tailwind CSS
 - **Charts:** Recharts zur Visualisierung von Cashflows und Energieflüssen
 - **APIs:** Integration von nötigen APIs für standortgenaue Ertragsdaten, aktuell PVGIS der EU sowie Photon (Komoot/OpenStreetMap) für die Adresszuordnung – kein API-Key erforderlich.
+- **Support:** [Formbricks](https://formbricks.com/) – optionale In-App-Umfragen und Feedback-Formulare, konfigurierbar über eine Umgebungsvariable.
 
 ## 🔧 Installation & Setup
 
@@ -49,6 +50,8 @@ Das Tool vergleicht zwei wesentliche Modelle:
 4. **Starten**: `npm run dev`
 
 Detaillierte Informationen zu Umgebungsvariablen und Deployment (Netlify, Vercel, Nginx) findest du in der [Deployment-Dokumentation](docu/deployment.md).
+
+Die Berechnungslogik ist mit **[Vitest](https://vitest.dev/)** durch automatisierte Tests abgesichert (`npm test`). Details zur Teststruktur und -ausführung findest du in der [Deployment-Dokumentation](docu/deployment.md).
 
 ---
 
@@ -88,6 +91,7 @@ The tool distinguishes between two primary models in Germany:
 - **Styling:** Tailwind CSS
 - **Charts:** Recharts for visualizing energy flows and financial forecasts
 - **APIs:** Integration of necessary APIs for location-specific yield data, currently PVGIS from the EU and Photon (Komoot/OpenStreetMap) for address autocomplete – no API key required.
+- **Support:** [Formbricks](https://formbricks.com/) – optional in-app surveys and feedback forms, configurable via an environment variable.
 
 ## 🔧 Installation & Setup
 
@@ -97,6 +101,8 @@ The tool distinguishes between two primary models in Germany:
 4. **Run App**: `npm run dev`
 
 For details on environment variables and deployment options (Netlify, Vercel, Nginx) see the [Deployment Documentation](docu/deployment.md).
+
+The calculation logic is covered by automated tests using **[Vitest](https://vitest.dev/)** (`npm test`). For details on test structure and how to run them, see the [Deployment Documentation](docu/deployment.md).
 
 ---
 

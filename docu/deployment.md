@@ -9,13 +9,30 @@
 
 ### Umgebungsvariablen
 
-Lege eine `.env`-Datei im Projektstammverzeichnis an (Vorlage: `.env.example`, falls vorhanden):
+Lege eine `.env`-Datei im Projektstammverzeichnis an (Vorlage: `.env_example`):
 
 | Variable | Pflicht | Beschreibung |
 |---|---|---|
 | `VITE_PVGIS_BASE_URL` | Nein | Basis-URL für die PVGIS-API. Standard: `/pvgis-api/api/v5_2` (geht durch den konfigurierten Proxy) |
+| `VITE_FORMBRICKS_WORKSPACE_ID` | Nein | Workspace-ID aus dem Formbricks-Dashboard. Aktiviert den „Feedback & Support"-Button in der Sidebar. Ohne diese Variable bleibt der Button stumm. |
 
 > Die Adress-Autovervollständigung nutzt [Photon (Komoot)](https://photon.komoot.io/) auf Basis von OpenStreetMap – kein API-Key notwendig.
+
+#### Formbricks einrichten (optional)
+
+[Formbricks](https://formbricks.com/) ermöglicht In-App-Umfragen, die über einen Button in der Sidebar geöffnet werden können.
+
+**Schritte:**
+
+1. Konto bei [app.formbricks.com](https://app.formbricks.com) anlegen (kostenloser Cloud-Plan verfügbar)
+2. Eine **App Survey** erstellen (Typ: *App Survey*, nicht *Link Survey*)
+3. Als Auslöser einen **Code-Trigger** mit dem Event-Schlüssel `support` konfigurieren
+4. Survey auf **Live** schalten
+5. Die **Workspace-ID** unter *Settings → General* kopieren
+6. In `.env` eintragen: `VITE_FORMBRICKS_WORKSPACE_ID=<deine-id>`
+7. Für Netlify: Variable zusätzlich unter *Site settings → Environment variables* setzen
+
+> Ist `VITE_FORMBRICKS_WORKSPACE_ID` nicht gesetzt, wird Formbricks nicht initialisiert – das App-Verhalten ändert sich nicht.
 
 #### Hinweis zur PVGIS-API
 
@@ -126,18 +143,98 @@ npm run check-all  # Alle Prüfungen abschließend ausführen
 
 ---
 
+### 🧪 Tests
+
+Die Berechnungslogik ist mit **[Vitest](https://vitest.dev/)** abgedeckt, um bei der Weiterentwicklung sicherzustellen, dass alle Energie- und Wirtschaftlichkeitsberechnungen korrekt bleiben.
+
+#### Teststruktur
+
+```
+tests/
+└── lib/
+    ├── calculations.test.ts          # Jahresenergiebilanz & Wirtschaftlichkeit
+    └── energyFlowCalculation.test.ts # Monatliche Energieflüsse
+```
+
+| Testdatei | Getestete Funktionen | Testfälle |
+|---|---|---|
+| `calculations.test.ts` | `calculateEnergyYield`, `calculateEconomics`, `fetchPvgisYield` | 61 |
+| `energyFlowCalculation.test.ts` | `calculateMonthlyEnergyFlows`, `fetchPvgisMonthlyYield` | 32 |
+
+#### Was wird getestet?
+
+**`calculateEnergyYield`** – Jahres-Energiebilanz:
+- Aggregation des Gesamtverbrauchs (Wohneinheiten, Wärmepumpe, E-Mobilität, Allgemeinstrom)
+- Eigenverbrauchsheuristik inkl. 85%-Cap und Batteriefaktor
+- Energieerhaltung: `Eigenverbrauch + Einspeisung = PV-Ertrag`
+- Autarkie- und Eigenverbrauchsquoten
+
+**`calculateEconomics`** – 20-Jahres-Wirtschaftlichkeit:
+- Annuitätenformel für Kreditfinanzierung
+- Einnahmenmodelle GGV vs. Mieterstrom (Grundgebühr, Zuschlag)
+- LCOE-Berechnung (Stromgestehungskosten in ct/kWh)
+- Amortisationszeit und kumulativer Cashflow
+
+**`calculateMonthlyEnergyFlows`** – Monatliche Energieflüsse:
+- Defizitmonate (PV < Bedarf): gesamter Ertrag wird verbraucht, Rest aus Netz
+- Überschussmonate ohne Batterie: Überschuss wird eingespeist
+- Überschussmonate mit Batterie: Pufferung bis zur Kapazität, dann Einspeisung
+- Energieerhaltung pro Monat in beide Richtungen
+
+**`fetchPvgisYield` / `fetchPvgisMonthlyYield`** – PVGIS-API:
+- Fallbacks bei fehlenden Koordinaten oder API-Fehlern
+- Korrektes Parsing der PVGIS v5.2-Antwortstruktur
+
+#### Tests ausführen
+
+```bash
+# Einmalig (z. B. in CI)
+npm test
+
+# Interaktiver Watch-Modus (während der Entwicklung)
+npm run test:watch
+
+# Mit Coverage-Report
+npm run test:coverage
+```
+
+Der Coverage-Report wird nach `npm run test:coverage` im Ordner `coverage/` erzeugt und kann mit einem Browser geöffnet werden (`coverage/index.html`). Der Ordner ist in `.gitignore` eingetragen und wird nicht versioniert.
+
+#### Tests erweitern
+
+Neue Berechnungsfunktionen sollten immer mit entsprechenden Tests in `tests/lib/` abgesichert werden. Die Test-Fixtures (`mkSystem`, `mkConsumption`, `mkEconomics`, `mkFinancing`) in den jeweiligen Testdateien erlauben es, nur die für den Testfall relevanten Parameter zu überschreiben – alle anderen erhalten sinnvolle Standardwerte.
+
+---
+
 <a name="english"></a>
 ## 🇺🇸 English
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root (template: `.env_example`):
 
 | Variable | Required | Description |
 |---|---|---|
 | `VITE_PVGIS_BASE_URL` | No | Base URL for the PVGIS API. Default: `/pvgis-api/api/v5_2` (routed through the configured proxy) |
+| `VITE_FORMBRICKS_WORKSPACE_ID` | No | Workspace ID from the Formbricks dashboard. Enables the "Feedback & Support" button in the sidebar. Without this variable the button is a no-op. |
 
 > Address autocomplete uses [Photon (Komoot)](https://photon.komoot.io/) powered by OpenStreetMap — no API key required.
+
+#### Setting up Formbricks (optional)
+
+[Formbricks](https://formbricks.com/) provides in-app surveys that can be opened via a button in the sidebar.
+
+**Steps:**
+
+1. Create an account at [app.formbricks.com](https://app.formbricks.com) (free cloud plan available)
+2. Create an **App Survey** (type: *App Survey*, not *Link Survey*)
+3. Add a **Code trigger** with the event key `support`
+4. Set the survey status to **Live**
+5. Copy the **Workspace ID** from *Settings → General*
+6. Add to `.env`: `VITE_FORMBRICKS_WORKSPACE_ID=<your-id>`
+7. For Netlify: also add the variable under *Site settings → Environment variables*
+
+> If `VITE_FORMBRICKS_WORKSPACE_ID` is not set, Formbricks is not initialized — the app behaviour is unchanged.
 
 #### Note on the PVGIS API
 
@@ -245,3 +342,66 @@ The project uses **ESLint** (linter) and **Prettier** (formatter).
 npm run fix-all    # Apply Prettier + ESLint auto-fixes
 npm run check-all  # Run all checks to verify
 ```
+
+---
+
+### 🧪 Tests
+
+The calculation logic is covered by **[Vitest](https://vitest.dev/)** to ensure that all energy and financial calculations remain correct as the project evolves.
+
+#### Test Structure
+
+```
+tests/
+└── lib/
+    ├── calculations.test.ts          # Annual energy balance & financial projections
+    └── energyFlowCalculation.test.ts # Monthly energy flows
+```
+
+| Test file | Functions under test | Test cases |
+|---|---|---|
+| `calculations.test.ts` | `calculateEnergyYield`, `calculateEconomics`, `fetchPvgisYield` | 61 |
+| `energyFlowCalculation.test.ts` | `calculateMonthlyEnergyFlows`, `fetchPvgisMonthlyYield` | 32 |
+
+#### What is tested?
+
+**`calculateEnergyYield`** – Annual energy balance:
+- Consumption aggregation (apartments, heat pump, EV charging, general electricity)
+- Self-consumption heuristic including the 85% cap and battery factor
+- Energy conservation: `self-consumption + grid export = PV yield`
+- Autarky rate and self-consumption rate
+
+**`calculateEconomics`** – 20-year financial projection:
+- Annuity formula for loan financing
+- Revenue models GGV vs. Mieterstrom (base fee, subsidy)
+- LCOE calculation (levelized cost of electricity in ct/kWh)
+- Amortization period and cumulative cash flow
+
+**`calculateMonthlyEnergyFlows`** – Monthly energy flows:
+- Deficit months (PV < demand): full yield consumed, remainder from grid
+- Surplus months without battery: surplus fed into grid
+- Surplus months with battery: buffered up to capacity, then fed into grid
+- Energy conservation per month in both directions
+
+**`fetchPvgisYield` / `fetchPvgisMonthlyYield`** – PVGIS API:
+- Fallbacks for missing coordinates or API failures
+- Correct parsing of the PVGIS v5.2 response structure
+
+#### Running the Tests
+
+```bash
+# Single run (e.g. in CI)
+npm test
+
+# Interactive watch mode (during development)
+npm run test:watch
+
+# With coverage report
+npm run test:coverage
+```
+
+After `npm run test:coverage`, the HTML coverage report is generated in the `coverage/` folder and can be opened in a browser (`coverage/index.html`). The folder is listed in `.gitignore` and is not versioned.
+
+#### Extending the Tests
+
+New calculation functions should always be accompanied by corresponding tests in `tests/lib/`. The test fixtures (`mkSystem`, `mkConsumption`, `mkEconomics`, `mkFinancing`) in each test file allow overriding only the parameters relevant to the test case — all others receive sensible default values.
