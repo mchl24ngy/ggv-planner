@@ -38,7 +38,9 @@ import {
   CheckCircle,
   AlertCircle,
   HelpCircle,
+  MessageCircle,
 } from 'lucide-react';
+import formbricks from '@formbricks/js';
 import { exportToJson, importFromJson } from '../lib/jsonExport';
 import type { GgvPlannerExportUi } from '../lib/jsonExport';
 import { WelcomeModal } from './WelcomeModal';
@@ -66,7 +68,7 @@ export const Configurator: React.FC = () => {
 
   const [consumption, setConsumption] = useState<ConsumptionParams>({
     apartments: 10,
-    participationRate: 1.0,
+    participationRate: 0.8,
     consumptionPerApartmentKwh: 1800,
     hasHeatPump: false,
     heatPumpConsumptionKwh: 10000,
@@ -400,15 +402,25 @@ export const Configurator: React.FC = () => {
             <span className="hidden md:block">{t.tab3}</span>
           </button>
 
-          {/* Restart tutorial button */}
-          <button
-            onClick={startTutorial}
-            title={t.tutorialBtnRestart}
-            className="hidden md:flex items-center gap-2 mt-auto px-6 py-4 text-slate-400 hover:text-blue-500 transition-colors text-xs font-medium border-t border-slate-200"
-          >
-            <HelpCircle size={16} />
-            <span>{t.tutorialBtnRestart}</span>
-          </button>
+          {/* Bottom sidebar actions */}
+          <div className="hidden md:flex flex-col mt-auto">
+            <button
+              onClick={() => formbricks.track('support')}
+              title={t.supportBtnLabel}
+              className="flex items-center gap-2 px-6 py-4 text-slate-400 hover:text-blue-500 transition-colors text-xs font-medium border-t border-slate-200"
+            >
+              <MessageCircle size={16} />
+              <span>{t.supportBtnLabel}</span>
+            </button>
+            <button
+              onClick={startTutorial}
+              title={t.tutorialBtnRestart}
+              className="flex items-center gap-2 px-6 py-4 text-slate-400 hover:text-blue-500 transition-colors text-xs font-medium border-t border-slate-200"
+            >
+              <HelpCircle size={16} />
+              <span>{t.tutorialBtnRestart}</span>
+            </button>
+          </div>
         </div>
 
         {/* Tab Content */}
