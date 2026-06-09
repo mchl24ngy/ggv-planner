@@ -69,6 +69,7 @@ export const Configurator: React.FC = () => {
   const [depreciationMethod, setDepreciationMethod] = useState<'linear' | 'degressive'>('linear');
 
   // State: Inputs
+  // Technical system parameters: location (address + coordinates), PV capacity, tilt/azimuth, battery storage
   const [system, setSystem] = useState<SystemParams>({
     address: 'Berlin, Germany',
     locationLat: 52.52,
@@ -76,13 +77,14 @@ export const Configurator: React.FC = () => {
     inclination: 35,
     azimuth: 0,
     systemLoss: 14,
-    pvCapacityKwp: 50,
+    pvCapacityKwp: 30,
     hasBattery: true,
-    batteryCapacityKwh: 25,
+    batteryCapacityKwh: 15,
   });
 
+  // Consumption parameters: number of apartments, participation rate, and optional loads (heat pump, EV charging, common-area electricity)
   const [consumption, setConsumption] = useState<ConsumptionParams>({
-    apartments: 10,
+    apartments: 15,
     participationRate: 0.8,
     consumptionPerApartmentKwh: 1800,
     hasHeatPump: false,
@@ -90,33 +92,28 @@ export const Configurator: React.FC = () => {
     hasEvCharging: false,
     evChargingPoints: 2,
     evChargingConsumptionPerPointKwh: 2000,
-    hasGeneralConsumption: false,
+    hasGeneralConsumption: true,
     generalConsumptionKwh: 2000,
   });
 
+  // Economic parameters: business model, tariffs (tenant rate, feed-in, grid), base fee, subsidy, CAPEX/OPEX, and calculation horizon
   const [economics, setEconomics] = useState<EconomicParams>({
     model: 'Mieterstrom',
-    tenantElectricityRate: 20,
+    tenantElectricityRate: 22,
     gridElectricityRate: 35,
     feedInTariff: 5,
     tenantElectricitySubsidy: 2.1,
     baseFeePerMonth: 10,
     roofRentPerMonth: 0,
-    capex: calcDefaultCapex(50, true, 25),
-    opexPerYear: calcDefaultOpex(calcDefaultCapex(50, true, 25), {
-      apartments: 10,
-      participationRate: 0.8,
-      hasEvCharging: false,
-      evChargingPoints: 2,
-      hasGeneralConsumption: false,
-      hasHeatPump: false,
-    }),
+    capex: 0, // recalculated on mount by the CAPEX auto-derive effect
+    opexPerYear: 0, // recalculated on mount by the OPEX auto-derive effect
     calculationPeriodYears: 20,
   });
 
+  // Financing parameters: loan amount, repayment term, and interest rate for the annuity calculation
   const [financing, setFinancing] = useState<FinancingParams>({
     loanAmount: 50000,
-    loanTermYears: 10,
+    loanTermYears: 15,
     interestRate: 4.5,
   });
 
@@ -148,7 +145,13 @@ export const Configurator: React.FC = () => {
   };
 
   const handleExportJson = () => {
-    const ui: GgvPlannerExportUi = { expertMode, pvInputMode, roofAreaM2, capexIsCustom, opexIsCustom };
+    const ui: GgvPlannerExportUi = {
+      expertMode,
+      pvInputMode,
+      roofAreaM2,
+      capexIsCustom,
+      opexIsCustom,
+    };
     exportToJson(system, consumption, economics, financing, ui);
   };
 
@@ -157,7 +160,13 @@ export const Configurator: React.FC = () => {
     e.target.value = '';
     if (!file) return;
 
-    const defaults: GgvPlannerExportUi = { expertMode, pvInputMode, roofAreaM2, capexIsCustom, opexIsCustom };
+    const defaults: GgvPlannerExportUi = {
+      expertMode,
+      pvInputMode,
+      roofAreaM2,
+      capexIsCustom,
+      opexIsCustom,
+    };
     const result = await importFromJson(file, {
       system,
       consumption,
@@ -1233,8 +1242,12 @@ export const Configurator: React.FC = () => {
                       />
                       {!capexIsCustom ? (
                         <p className="mt-1 text-xs text-blue-600">
-                          {t.capexAutoLabel}:{' '}
-                          {system.pvCapacityKwp} kWp × {getTierForValue(PV_COST_TIERS, system.pvCapacityKwp).pricePerUnit.toLocaleString('de-DE')} €/kWp
+                          {t.capexAutoLabel}: {system.pvCapacityKwp} kWp ×{' '}
+                          {getTierForValue(
+                            PV_COST_TIERS,
+                            system.pvCapacityKwp
+                          ).pricePerUnit.toLocaleString('de-DE')}{' '}
+                          €/kWp
                           {system.hasBattery &&
                             ` + ${system.batteryCapacityKwh} kWh × ${getTierForValue(BATTERY_COST_TIERS, system.batteryCapacityKwh).pricePerUnit.toLocaleString('de-DE')} €/kWh`}
                         </p>
@@ -1276,10 +1289,11 @@ export const Configurator: React.FC = () => {
                       />
                       {!opexIsCustom ? (
                         <p className="mt-1 text-xs text-blue-600">
-                          {t.opexAutoLabel}:{' '}
-                          {(TECH_MANAGEMENT_RATE * 100).toLocaleString('de-DE')} % CAPEX
+                          {t.opexAutoLabel}: {(TECH_MANAGEMENT_RATE * 100).toLocaleString('de-DE')}{' '}
+                          % CAPEX
                           {' + '}
-                          {calcBillingParticipants(consumption)} × {BILLING_COST_PER_PARTICIPANT} €/Jahr
+                          {calcBillingParticipants(consumption)} × {BILLING_COST_PER_PARTICIPANT}{' '}
+                          €/Jahr
                         </p>
                       ) : (
                         <div className="mt-1 flex items-center gap-2">
@@ -1788,7 +1802,11 @@ export const Configurator: React.FC = () => {
                                       return (economics.capex / usefulLife).toFixed(2);
                                     }
                                     const rate = 2 / usefulLife;
-                                    return (economics.capex * rate * Math.pow(1 - rate, year - 1)).toFixed(2);
+                                    return (
+                                      economics.capex *
+                                      rate *
+                                      Math.pow(1 - rate, year - 1)
+                                    ).toFixed(2);
                                   })()}
                                 </td>
                               </tr>
