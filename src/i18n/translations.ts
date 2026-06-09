@@ -148,19 +148,19 @@ export const translations = {
     labelCapex: 'Investmentkosten CAPEX (€ netto)',
     tooltipCapex:
       'Gesamte Investitionskosten der Anlage (Netto, ohne MwSt.). Inkl. Module, Wechselrichter, Montage, Elektrik und ggf. Speicher.',
-    capexAutoLabel: 'Marktdurchschnitt (automatisch)',
+    capexAutoLabel: 'Preisindikation',
     capexCustomLabel: 'Manuell angepasst',
     capexResetDefault: 'Zurücksetzen',
 
     labelOpex: 'Betriebskosten OPEX (€ pro Jahr)',
     tooltipOpex:
       'Jährliche Betriebskosten: Wartung, Versicherung, Zählerabrechnung, Softwaregebühren, etc. Typisch: 1–2% des CAPEX p.a.',
-    opexAutoLabel: 'Marktdurchschnitt (automatisch)',
+    opexAutoLabel: 'Preisindikation',
     opexCustomLabel: 'Manuell angepasst',
     opexResetDefault: 'Zurücksetzen',
 
     // Breakdown modal – shared UI
-    breakdownOpen: 'Kosten aufschlüsseln',
+    breakdownOpen: 'Eigene Preise eingeben',
     breakdownApply: 'Übernehmen',
     breakdownCancel: 'Abbrechen',
     breakdownTotal: 'Gesamtbetrag',
@@ -237,6 +237,10 @@ export const translations = {
     tableInterest: '- Zinsen',
     tablePrincipal: '- Tilgung',
     tableCashflow: 'Cashflow vor Steuern',
+    tableDepreciation: 'Abschreibung (AfA)',
+    tableDepreciationLinear: 'Linear',
+    tableDepreciationDegressive: 'Degressiv',
+    tableDepreciationNote: 'nicht cashflow-wirksam',
 
     // Tooltip model hint
     tooltipModelMieterstrom:
@@ -488,14 +492,14 @@ export const translations = {
     labelCapex: 'CAPEX (€ net)',
     tooltipCapex:
       'Total investment costs of the system (net, excl. VAT). Including modules, inverters, mounting, electrical work, and storage if applicable.',
-    capexAutoLabel: 'Market average (automatic)',
+    capexAutoLabel: 'Price Indication',
     capexCustomLabel: 'Manually set',
     capexResetDefault: 'Reset to default',
 
     labelOpex: 'OPEX (€/year)',
     tooltipOpex:
       'Annual operating costs: maintenance, insurance, metering, billing, software fees, etc. Typically 1–2% of CAPEX per year.',
-    opexAutoLabel: 'Market average (automatic)',
+    opexAutoLabel: 'Price Indication',
     opexCustomLabel: 'Manually set',
     opexResetDefault: 'Reset to default',
 
@@ -578,6 +582,10 @@ export const translations = {
     tableInterest: '- Interest',
     tablePrincipal: '- Principal Repayment',
     tableCashflow: 'Pre-tax Cashflow',
+    tableDepreciation: 'Depreciation (AfA)',
+    tableDepreciationLinear: 'Linear',
+    tableDepreciationDegressive: 'Declining balance',
+    tableDepreciationNote: 'non-cash item',
 
     // Tooltip model hint
     tooltipModelMieterstrom:

@@ -66,6 +66,7 @@ export const Configurator: React.FC = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedYearIndex, setSelectedYearIndex] = useState(0);
+  const [depreciationMethod, setDepreciationMethod] = useState<'linear' | 'degressive'>('linear');
 
   // State: Inputs
   const [system, setSystem] = useState<SystemParams>({
@@ -1749,6 +1750,46 @@ export const Configurator: React.FC = () => {
                                 </td>
                                 <td className="px-4 py-3 text-right font-bold text-slate-800">
                                   {ecoResults.cashflowPlan[selectedYearIndex]?.cashflow.toFixed(2)}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td colSpan={2} className="px-4 pt-4 pb-1">
+                                  <div className="border-t border-slate-200" />
+                                </td>
+                              </tr>
+                              <tr className="bg-slate-50">
+                                <td className="px-4 py-2 text-slate-600">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="font-medium">{t.tableDepreciation}</span>
+                                    <span className="text-xs text-slate-400 italic">
+                                      ({t.tableDepreciationNote})
+                                    </span>
+                                    <div className="flex rounded-md border border-slate-200 overflow-hidden text-xs">
+                                      <button
+                                        onClick={() => setDepreciationMethod('linear')}
+                                        className={`px-2 py-0.5 transition-colors ${depreciationMethod === 'linear' ? 'bg-slate-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-100'}`}
+                                      >
+                                        {t.tableDepreciationLinear}
+                                      </button>
+                                      <button
+                                        onClick={() => setDepreciationMethod('degressive')}
+                                        className={`px-2 py-0.5 transition-colors ${depreciationMethod === 'degressive' ? 'bg-slate-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-100'}`}
+                                      >
+                                        {t.tableDepreciationDegressive}
+                                      </button>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-2 text-right text-slate-600">
+                                  {(() => {
+                                    const year = selectedYearIndex + 1;
+                                    const usefulLife = 20;
+                                    if (depreciationMethod === 'linear') {
+                                      return (economics.capex / usefulLife).toFixed(2);
+                                    }
+                                    const rate = 2 / usefulLife;
+                                    return (economics.capex * rate * Math.pow(1 - rate, year - 1)).toFixed(2);
+                                  })()}
                                 </td>
                               </tr>
                             </tbody>
