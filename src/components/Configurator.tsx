@@ -100,7 +100,7 @@ export const Configurator: React.FC = () => {
     feedInTariff: 5,
     tenantElectricitySubsidy: 2.1,
     baseFeePerMonth: 10,
-    roofRentPerMonth: 50,
+    roofRentPerMonth: 0,
     capex: calcDefaultCapex(50, true, 25),
     opexPerYear: calcDefaultOpex(calcDefaultCapex(50, true, 25), {
       apartments: 10,
@@ -240,6 +240,7 @@ export const Configurator: React.FC = () => {
     techManagement: 0,
     billing: 0,
     adminManagement: 0,
+    roofRent: 0,
   });
   const [showCapexModal, setShowCapexModal] = useState(false);
   const [showOpexModal, setShowOpexModal] = useState(false);
@@ -263,6 +264,7 @@ export const Configurator: React.FC = () => {
         techManagement: calcDefaultTechManagementCost(economics.capex),
         billing: calcDefaultBillingCost(consumption),
         adminManagement: 0,
+        roofRent: economics.roofRentPerMonth * 12,
       });
     }
     setShowOpexModal(true);
@@ -1183,7 +1185,7 @@ export const Configurator: React.FC = () => {
                   )}
 
                   <div className="pt-2">
-                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="flex items-center text-sm font-medium text-slate-700 mb-1">
                           {t.labelGridRate}
@@ -1197,24 +1199,6 @@ export const Configurator: React.FC = () => {
                             setEconomics({
                               ...economics,
                               gridElectricityRate: Number(e.target.value),
-                            })
-                          }
-                          className={inputClassEco}
-                        />
-                      </div>
-                      <div>
-                        <label className="flex items-center text-sm font-medium text-slate-700 mb-1">
-                          {t.labelRoofRent}
-                          <Tooltip text={t.tooltipRoofRent} />
-                        </label>
-                        <input
-                          type="number"
-                          step="1"
-                          value={economics.roofRentPerMonth}
-                          onChange={(e) =>
-                            setEconomics({
-                              ...economics,
-                              roofRentPerMonth: Number(e.target.value),
                             })
                           }
                           className={inputClassEco}
@@ -1301,7 +1285,10 @@ export const Configurator: React.FC = () => {
                           <span className="text-xs text-amber-600">{t.opexCustomLabel}</span>
                           <button
                             type="button"
-                            onClick={() => setOpexIsCustom(false)}
+                            onClick={() => {
+                              setOpexIsCustom(false);
+                              setEconomics((prev) => ({ ...prev, roofRentPerMonth: 0 }));
+                            }}
                             className="text-xs text-blue-600 hover:underline"
                           >
                             {t.opexResetDefault}
@@ -2000,6 +1987,11 @@ export const Configurator: React.FC = () => {
             label: t.breakdownOpexAdminManagement,
             tooltip: t.tooltipBreakdownOpexAdminManagement,
           },
+          {
+            key: 'roofRent',
+            label: t.breakdownOpexRoofRent,
+            tooltip: t.tooltipBreakdownOpexRoofRent,
+          },
         ]}
         values={opexBreakdown}
         totalLabel={t.breakdownTotal}
@@ -2008,7 +2000,12 @@ export const Configurator: React.FC = () => {
         onChangeValue={(key, value) => setOpexBreakdown({ ...opexBreakdown, [key]: value })}
         onApply={(total) => {
           setOpexIsCustom(true);
-          setEconomics({ ...economics, opexPerYear: total });
+          const roofRentAnnual = opexBreakdown.roofRent ?? 0;
+          setEconomics({
+            ...economics,
+            opexPerYear: total - roofRentAnnual,
+            roofRentPerMonth: roofRentAnnual / 12,
+          });
           setShowOpexModal(false);
         }}
         onClose={() => setShowOpexModal(false)}

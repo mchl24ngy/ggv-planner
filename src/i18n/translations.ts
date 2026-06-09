@@ -196,6 +196,9 @@ export const translations = {
     breakdownOpexAdminManagement: 'Administrative Betriebsführung',
     tooltipBreakdownOpexAdminManagement:
       'Verwaltungsaufwand, Versicherungen (Ertrags- und Haftpflicht), Buchführung und Kommunikation mit Mietern.',
+    breakdownOpexRoofRent: 'Dachpacht (jährl.)',
+    tooltipBreakdownOpexRoofRent:
+      'Jährliche Dachpacht: monatliche Pachtrate × 12. Wird intern als monatlicher Wert in der Wirtschaftlichkeitsberechnung geführt. Bei kostenfreier Dachüberlassung: 0 lassen.',
 
     labelLoanAmount: 'Kreditbetrag (€)',
     tooltipLoanAmount:
@@ -533,6 +536,9 @@ export const translations = {
     breakdownOpexAdminManagement: 'Administrative Operations',
     tooltipBreakdownOpexAdminManagement:
       'Administrative overhead, insurance (yield and liability), accounting, and tenant communication.',
+    breakdownOpexRoofRent: 'Roof Rent (annual)',
+    tooltipBreakdownOpexRoofRent:
+      'Annual roof rent: monthly rate × 12. Stored internally as a monthly value in the financial calculation. If the roof is provided free of charge, leave this at 0.',
 
     labelLoanAmount: 'Loan Amount (€)',
     tooltipLoanAmount:

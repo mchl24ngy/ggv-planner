@@ -77,7 +77,6 @@ Wählen Sie zwischen zwei Modellen:
 | **Grundgebühr** | Monatliche Pauschale pro WE (nur Mieterstrom-Modell) |
 | **Mieterstromzuschlag** | Staatliche Förderung nach § 21 EEG (abhängig von Anlagengröße) |
 | **Referenzpreis Netz** | Lokaler Grundversorger-Tarif als Vergleichsbasis |
-| **Dachpacht** | Monatliche Miete für die Dachnutzung (kann auch entfallen) |
 
 #### Investitionskosten (CAPEX) – Automatische Berechnung
 
@@ -139,6 +138,8 @@ Als Vertragspartei zählen alle Einheiten, für die eine eigene Messung und Abre
 *Beispiel: 10 WE × 80 % + 2 Wallboxen = 10 Vertragsparteien → 10 × 150 € = 1.500 €/Jahr Abrechnungskosten.*
 
 **Administrative Betriebsführung** (kein Standardwert) — Versicherungen, Buchführung, Mieterkommunikation. Diesen Betrag tragen Sie bei Bedarf manuell ein.
+
+**Dachpacht (jährl.)** (Standard: 0 €) — Jährliche Kosten für die Dachnutzung (monatliche Rate × 12). Viele Eigentümer überlassen das Dach kostenfrei, da die PV-Anlage den Gebäudewert steigert. Wenn eine Pacht vereinbart ist, tragen Sie hier den Jahresbetrag ein.
 
 **Kosten aufschlüsseln (manuelle Eingabe)**
 
@@ -279,7 +280,6 @@ Choose between two models:
 | **Base Fee** | Monthly flat rate per unit (Mieterstrom model only) |
 | **Tenant Electricity Subsidy** | Government subsidy per §21 EEG (depends on system size) |
 | **Grid Reference Price** | Local utility rate used as a benchmark |
-| **Roof Rent** | Monthly rent for roof usage (may be waived) |
 
 #### Investment Costs (CAPEX) – Automatic Calculation
 
@@ -341,6 +341,8 @@ A metered participant is any unit that requires its own meter reading and billin
 *Example: 10 units × 80 % + 2 wallboxes = 10 participants → 10 × 150 € = 1,500 €/yr billing costs.*
 
 **Administrative Operations** (no default value) — insurance, accounting, tenant communication. Enter this amount manually if applicable.
+
+**Roof Rent (annual)** (default: 0 €) — Annual cost for roof usage (monthly rate × 12). Many owners provide the roof free of charge since the PV system increases the building's value. If a rent is agreed, enter the annual amount here.
 
 **Break Down Costs (manual entry)**
 
