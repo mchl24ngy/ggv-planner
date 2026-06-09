@@ -118,8 +118,8 @@ export const translations = {
     sectionModel: 'Betriebsmodell wählen',
     modelMieterstrom: 'Klassischer Mieterstrom',
     modelGGV: 'GGV (Gemeinschaftl. Gebäudeversorgung)',
-    sectionTariffs: 'Stromtarife & Gebühren',
-    sectionFinancing: 'Investition & Finanzierung',
+    sectionTariffs: 'Einnahmen & Stromtarife',
+    sectionFinancing: 'Ausgaben & Finanzierung',
 
     labelTenantRate: 'Netto-Verkaufspreis Mieter (ct)',
     tooltipTenantRate:
@@ -148,13 +148,19 @@ export const translations = {
     labelCapex: 'Investmentkosten CAPEX (€ netto)',
     tooltipCapex:
       'Gesamte Investitionskosten der Anlage (Netto, ohne MwSt.). Inkl. Module, Wechselrichter, Montage, Elektrik und ggf. Speicher.',
+    capexAutoLabel: 'Preisindikation',
+    capexCustomLabel: 'Manuell angepasst',
+    capexResetDefault: 'Zurücksetzen',
 
     labelOpex: 'Betriebskosten OPEX (€ pro Jahr)',
     tooltipOpex:
       'Jährliche Betriebskosten: Wartung, Versicherung, Zählerabrechnung, Softwaregebühren, etc. Typisch: 1–2% des CAPEX p.a.',
+    opexAutoLabel: 'Preisindikation',
+    opexCustomLabel: 'Manuell angepasst',
+    opexResetDefault: 'Zurücksetzen',
 
     // Breakdown modal – shared UI
-    breakdownOpen: 'Kosten aufschlüsseln',
+    breakdownOpen: 'Eigene Preise eingeben',
     breakdownApply: 'Übernehmen',
     breakdownCancel: 'Abbrechen',
     breakdownTotal: 'Gesamtbetrag',
@@ -190,6 +196,9 @@ export const translations = {
     breakdownOpexAdminManagement: 'Administrative Betriebsführung',
     tooltipBreakdownOpexAdminManagement:
       'Verwaltungsaufwand, Versicherungen (Ertrags- und Haftpflicht), Buchführung und Kommunikation mit Mietern.',
+    breakdownOpexRoofRent: 'Dachpacht (jährl.)',
+    tooltipBreakdownOpexRoofRent:
+      'Jährliche Dachpacht: monatliche Pachtrate × 12. Wird intern als monatlicher Wert in der Wirtschaftlichkeitsberechnung geführt. Bei kostenfreier Dachüberlassung: 0 lassen.',
 
     labelLoanAmount: 'Kreditbetrag (€)',
     tooltipLoanAmount:
@@ -228,6 +237,10 @@ export const translations = {
     tableInterest: '- Zinsen',
     tablePrincipal: '- Tilgung',
     tableCashflow: 'Cashflow vor Steuern',
+    tableDepreciation: 'Abschreibung (AfA)',
+    tableDepreciationLinear: 'Linear',
+    tableDepreciationDegressive: 'Degressiv',
+    tableDepreciationNote: 'nicht cashflow-wirksam',
 
     // Tooltip model hint
     tooltipModelMieterstrom:
@@ -449,8 +462,8 @@ export const translations = {
     sectionModel: 'Select Operating Model',
     modelMieterstrom: 'Classic Tenant Electricity',
     modelGGV: 'GGV (Communal Building Supply)',
-    sectionTariffs: 'Tariffs & Fees',
-    sectionFinancing: 'Investment & Financing',
+    sectionTariffs: 'Earnings & Electricity Tariffs',
+    sectionFinancing: 'Costs & Financing',
 
     labelTenantRate: 'Net Tenant Sales Price (ct)',
     tooltipTenantRate:
@@ -479,10 +492,16 @@ export const translations = {
     labelCapex: 'CAPEX (€ net)',
     tooltipCapex:
       'Total investment costs of the system (net, excl. VAT). Including modules, inverters, mounting, electrical work, and storage if applicable.',
+    capexAutoLabel: 'Price Indication',
+    capexCustomLabel: 'Manually set',
+    capexResetDefault: 'Reset to default',
 
     labelOpex: 'OPEX (€/year)',
     tooltipOpex:
       'Annual operating costs: maintenance, insurance, metering, billing, software fees, etc. Typically 1–2% of CAPEX per year.',
+    opexAutoLabel: 'Price Indication',
+    opexCustomLabel: 'Manually set',
+    opexResetDefault: 'Reset to default',
 
     // Breakdown modal – shared UI
     breakdownOpen: 'Break down',
@@ -521,6 +540,9 @@ export const translations = {
     breakdownOpexAdminManagement: 'Administrative Operations',
     tooltipBreakdownOpexAdminManagement:
       'Administrative overhead, insurance (yield and liability), accounting, and tenant communication.',
+    breakdownOpexRoofRent: 'Roof Rent (annual)',
+    tooltipBreakdownOpexRoofRent:
+      'Annual roof rent: monthly rate × 12. Stored internally as a monthly value in the financial calculation. If the roof is provided free of charge, leave this at 0.',
 
     labelLoanAmount: 'Loan Amount (€)',
     tooltipLoanAmount:
@@ -560,6 +582,10 @@ export const translations = {
     tableInterest: '- Interest',
     tablePrincipal: '- Principal Repayment',
     tableCashflow: 'Pre-tax Cashflow',
+    tableDepreciation: 'Depreciation (AfA)',
+    tableDepreciationLinear: 'Linear',
+    tableDepreciationDegressive: 'Declining balance',
+    tableDepreciationNote: 'non-cash item',
 
     // Tooltip model hint
     tooltipModelMieterstrom:

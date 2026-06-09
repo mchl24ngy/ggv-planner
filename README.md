@@ -49,6 +49,8 @@ Das Tool vergleicht zwei wesentliche Modelle:
 3. **Umgebungsvariablen**: Diese in der Datei `.env` anpassen.
 4. **Starten**: `npm run dev`
 
+Eine vollständige **Bedienungsanleitung** des Tools findest du in der [Bedienungsanleitung](docu/instruction.md).
+
 Detaillierte Informationen zu Umgebungsvariablen und Deployment (Netlify, Vercel, Nginx) findest du in der [Deployment-Dokumentation](docu/deployment.md).
 
 Die Berechnungslogik ist mit **[Vitest](https://vitest.dev/)** durch automatisierte Tests abgesichert (`npm test`). Details zur Teststruktur und -ausführung findest du in der [Deployment-Dokumentation](docu/deployment.md).
@@ -99,6 +101,8 @@ The tool distinguishes between two primary models in Germany:
 2. **Install Packages**: `npm install`
 3. **Add Env Variable**: Set variables in file `.env`
 4. **Run App**: `npm run dev`
+
+A full **user guide** for the tool is available in the [User Guide](docu/instruction.md).
 
 For details on environment variables and deployment options (Netlify, Vercel, Nginx) see the [Deployment Documentation](docu/deployment.md).
 
