@@ -121,6 +121,44 @@ VITE_PVGIS_BASE_URL=https://deine-domain.de/pvgis-api/api/v5_2 npm run build
 
 ---
 
+### Marktdurchschnittswerte anpassen
+
+Die automatisch berechneten CAPEX-Richtwerte (PV-Anlage und Batteriespeicher) sind zentral in einer einzigen Datei gespeichert:
+
+```
+src/lib/avgCostConfig.ts
+```
+
+Dort sind die Preisstaffeln als Arrays definiert:
+
+```ts
+// PV-Anlage: €/kWp je Größenstufe
+export const PV_COST_TIERS: CostTier[] = [
+  { upTo: 20, pricePerUnit: 1400 },   // bis 20 kWp
+  { upTo: 50, pricePerUnit: 1100 },   // 20–50 kWp
+  { upTo: Infinity, pricePerUnit: 950 }, // ab 50 kWp
+];
+
+// Batteriespeicher: €/kWh je Kapazitätsstufe
+export const BATTERY_COST_TIERS: CostTier[] = [
+  { upTo: 15, pricePerUnit: 600 },    // bis 15 kWh
+  { upTo: 30, pricePerUnit: 450 },    // 15–30 kWh
+  { upTo: Infinity, pricePerUnit: 350 }, // 30–100 kWh
+];
+
+// OPEX-Pauschalen
+export const TECH_MANAGEMENT_RATE = 0.01;        // 1 % des CAPEX pro Jahr
+export const BILLING_COST_PER_PARTICIPANT = 150; // €/Jahr je Vertragspartei
+```
+
+**CAPEX-Staffeln ändern:** Passen Sie `pricePerUnit` in den jeweiligen Einträgen an. Neue Staffeln können durch Hinzufügen weiterer Objekte ergänzt werden – `upTo` gibt die obere Grenze der Stufe in kWp bzw. kWh an; der letzte Eintrag muss `upTo: Infinity` haben.
+
+**OPEX-Pauschalen ändern:** `TECH_MANAGEMENT_RATE` ist der Anteil am CAPEX (z.B. `0.015` für 1,5 %). `BILLING_COST_PER_PARTICIPANT` ist der jährliche Abrechnungsbetrag pro Vertragspartei in €.
+
+**Wirkung:** Die Änderungen greifen sofort für alle automatisch berechneten Standardwerte im Tool. Nutzer, die bereits auf „Kosten aufschlüsseln" geklickt und eigene Werte eingetragen haben, sind nicht betroffen – deren manuell gesetzte Werte bleiben erhalten.
+
+---
+
 ### Codequalität: Linter & Formatter
 
 Das Projekt verwendet **ESLint** (Linter) und **Prettier** (Formatter).
@@ -320,6 +358,44 @@ Set `VITE_PVGIS_BASE_URL` at build time to your public proxy URL, e.g.:
 ```bash
 VITE_PVGIS_BASE_URL=https://your-domain.com/pvgis-api/api/v5_2 npm run build
 ```
+
+---
+
+### Updating Market Average Prices
+
+The automatically calculated CAPEX reference values (PV system and battery storage) are stored centrally in a single file:
+
+```
+src/lib/avgCostConfig.ts
+```
+
+The price tiers are defined there as arrays:
+
+```ts
+// PV system: €/kWp per size tier
+export const PV_COST_TIERS: CostTier[] = [
+  { upTo: 20, pricePerUnit: 1400 },      // up to 20 kWp
+  { upTo: 50, pricePerUnit: 1100 },      // 20–50 kWp
+  { upTo: Infinity, pricePerUnit: 950 }, // above 50 kWp
+];
+
+// Battery storage: €/kWh per capacity tier
+export const BATTERY_COST_TIERS: CostTier[] = [
+  { upTo: 15, pricePerUnit: 600 },       // up to 15 kWh
+  { upTo: 30, pricePerUnit: 450 },       // 15–30 kWh
+  { upTo: Infinity, pricePerUnit: 350 }, // 30–100 kWh
+];
+
+// OPEX flat rates
+export const TECH_MANAGEMENT_RATE = 0.01;        // 1% of CAPEX per year
+export const BILLING_COST_PER_PARTICIPANT = 150; // €/year per metered participant
+```
+
+**Changing CAPEX tiers:** Adjust `pricePerUnit` in the relevant entries. Additional tiers can be added by inserting more objects — `upTo` defines the upper boundary of each tier in kWp or kWh respectively; the last entry must always have `upTo: Infinity`.
+
+**Changing OPEX flat rates:** `TECH_MANAGEMENT_RATE` is the share of CAPEX (e.g. `0.015` for 1.5 %). `BILLING_COST_PER_PARTICIPANT` is the annual billing amount per metered participant in €.
+
+**Effect:** Changes take effect immediately for all automatically calculated default values in the tool. Users who have already clicked "Break down" and entered their own figures are not affected — their manually set values are preserved.
 
 ---
 

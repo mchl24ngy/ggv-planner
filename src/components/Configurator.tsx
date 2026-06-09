@@ -10,6 +10,20 @@ import {
 } from '../types';
 import { fetchPvgisYield, calculateEnergyYield, calculateEconomics } from '../lib/calculations';
 import { fetchPvgisMonthlyYield, calculateMonthlyEnergyFlows } from '../lib/energyFlowCalculation';
+import {
+  calcDefaultCapex,
+  calcDefaultPvCost,
+  calcDefaultBatteryCost,
+  calcDefaultOpex,
+  calcDefaultTechManagementCost,
+  calcDefaultBillingCost,
+  calcBillingParticipants,
+  getTierForValue,
+  PV_COST_TIERS,
+  BATTERY_COST_TIERS,
+  TECH_MANAGEMENT_RATE,
+  BILLING_COST_PER_PARTICIPANT,
+} from '../lib/avgCostConfig';
 import { KPIDisplay } from './KPIDisplay';
 import { EnergyMixChart } from './charts/EnergyMixChart';
 import { CashflowChart } from './charts/CashflowChart';
@@ -87,8 +101,15 @@ export const Configurator: React.FC = () => {
     tenantElectricitySubsidy: 2.1,
     baseFeePerMonth: 10,
     roofRentPerMonth: 50,
-    capex: 75000,
-    opexPerYear: 1500,
+    capex: calcDefaultCapex(50, true, 25),
+    opexPerYear: calcDefaultOpex(calcDefaultCapex(50, true, 25), {
+      apartments: 10,
+      participationRate: 0.8,
+      hasEvCharging: false,
+      evChargingPoints: 2,
+      hasGeneralConsumption: false,
+      hasHeatPump: false,
+    }),
     calculationPeriodYears: 20,
   });
 
@@ -99,6 +120,8 @@ export const Configurator: React.FC = () => {
   });
 
   const [expertMode, setExpertMode] = useState(false);
+  const [capexIsCustom, setCapexIsCustom] = useState(false);
+  const [opexIsCustom, setOpexIsCustom] = useState(false);
   const [isPdfExporting, setIsPdfExporting] = useState(false);
 
   // Tutorial state
@@ -124,7 +147,7 @@ export const Configurator: React.FC = () => {
   };
 
   const handleExportJson = () => {
-    const ui: GgvPlannerExportUi = { expertMode, pvInputMode, roofAreaM2 };
+    const ui: GgvPlannerExportUi = { expertMode, pvInputMode, roofAreaM2, capexIsCustom, opexIsCustom };
     exportToJson(system, consumption, economics, financing, ui);
   };
 
@@ -133,7 +156,7 @@ export const Configurator: React.FC = () => {
     e.target.value = '';
     if (!file) return;
 
-    const defaults: GgvPlannerExportUi = { expertMode, pvInputMode, roofAreaM2 };
+    const defaults: GgvPlannerExportUi = { expertMode, pvInputMode, roofAreaM2, capexIsCustom, opexIsCustom };
     const result = await importFromJson(file, {
       system,
       consumption,
@@ -159,6 +182,8 @@ export const Configurator: React.FC = () => {
     setExpertMode(result.ui.expertMode);
     setPvInputMode(result.ui.pvInputMode);
     setRoofAreaM2(result.ui.roofAreaM2);
+    setCapexIsCustom(result.ui.capexIsCustom ?? true);
+    setOpexIsCustom(result.ui.opexIsCustom ?? true);
     const newLoanPct =
       result.economics.capex > 0
         ? Math.round((result.financing.loanAmount / result.economics.capex) * 100)
@@ -202,7 +227,7 @@ export const Configurator: React.FC = () => {
     setPvInputMode(mode);
   };
 
-  const [loanPercentage, setLoanPercentage] = useState(Math.round((50000 / 75000) * 100));
+  const [loanPercentage, setLoanPercentage] = useState(67);
 
   const [capexBreakdown, setCapexBreakdown] = useState<Record<string, number>>({
     pvSystem: 0,
@@ -218,6 +243,30 @@ export const Configurator: React.FC = () => {
   });
   const [showCapexModal, setShowCapexModal] = useState(false);
   const [showOpexModal, setShowOpexModal] = useState(false);
+
+  const handleOpenCapexModal = () => {
+    if (!capexIsCustom) {
+      setCapexBreakdown({
+        pvSystem: calcDefaultPvCost(system.pvCapacityKwp),
+        battery: system.hasBattery ? calcDefaultBatteryCost(system.batteryCapacityKwh) : 0,
+        installation: 0,
+        consulting: 0,
+        other: 0,
+      });
+    }
+    setShowCapexModal(true);
+  };
+
+  const handleOpenOpexModal = () => {
+    if (!opexIsCustom) {
+      setOpexBreakdown({
+        techManagement: calcDefaultTechManagementCost(economics.capex),
+        billing: calcDefaultBillingCost(consumption),
+        adminManagement: 0,
+      });
+    }
+    setShowOpexModal(true);
+  };
 
   // Snapshot der Kundeneingaben beim Betreten von Tab 3 — Basis für ±50%-Optimierungsbereiche
   const [optimizationBase, setOptimizationBase] = useState({
@@ -288,6 +337,33 @@ export const Configurator: React.FC = () => {
       loanAmount: Math.round((economics.capex * loanPercentage) / 100),
     }));
   }, [economics.capex, loanPercentage]);
+
+  // CAPEX automatisch aus Anlagengröße berechnen, solange kein manueller Override aktiv ist
+  useEffect(() => {
+    if (capexIsCustom) return;
+    setEconomics((prev) => ({
+      ...prev,
+      capex: calcDefaultCapex(system.pvCapacityKwp, system.hasBattery, system.batteryCapacityKwh),
+    }));
+  }, [capexIsCustom, system.pvCapacityKwp, system.hasBattery, system.batteryCapacityKwh]);
+
+  // OPEX automatisch aus CAPEX und Verbrauchsparametern berechnen, solange kein manueller Override aktiv ist
+  useEffect(() => {
+    if (opexIsCustom) return;
+    setEconomics((prev) => ({
+      ...prev,
+      opexPerYear: calcDefaultOpex(prev.capex, consumption),
+    }));
+  }, [
+    opexIsCustom,
+    economics.capex,
+    consumption.apartments,
+    consumption.participationRate,
+    consumption.hasEvCharging,
+    consumption.evChargingPoints,
+    consumption.hasGeneralConsumption,
+    consumption.hasHeatPump,
+  ]);
 
   // Beim Wechsel zu Tab 3 aktuelle Kundeneingaben als ±50%-Referenz einfrieren
   useEffect(() => {
@@ -1164,14 +1240,34 @@ export const Configurator: React.FC = () => {
                         type="number"
                         step="500"
                         value={economics.capex}
-                        onChange={(e) =>
-                          setEconomics({ ...economics, capex: Number(e.target.value) })
-                        }
+                        onChange={(e) => {
+                          setCapexIsCustom(true);
+                          setEconomics({ ...economics, capex: Number(e.target.value) });
+                        }}
                         className={inputClassEco}
                       />
+                      {!capexIsCustom ? (
+                        <p className="mt-1 text-xs text-blue-600">
+                          {t.capexAutoLabel}:{' '}
+                          {system.pvCapacityKwp} kWp × {getTierForValue(PV_COST_TIERS, system.pvCapacityKwp).pricePerUnit.toLocaleString('de-DE')} €/kWp
+                          {system.hasBattery &&
+                            ` + ${system.batteryCapacityKwh} kWh × ${getTierForValue(BATTERY_COST_TIERS, system.batteryCapacityKwh).pricePerUnit.toLocaleString('de-DE')} €/kWh`}
+                        </p>
+                      ) : (
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="text-xs text-amber-600">{t.capexCustomLabel}</span>
+                          <button
+                            type="button"
+                            onClick={() => setCapexIsCustom(false)}
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            {t.capexResetDefault}
+                          </button>
+                        </div>
+                      )}
                       <button
                         type="button"
-                        onClick={() => setShowCapexModal(true)}
+                        onClick={handleOpenCapexModal}
                         className="mt-1.5 flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 hover:underline"
                       >
                         <List size={12} />
@@ -1187,14 +1283,34 @@ export const Configurator: React.FC = () => {
                         type="number"
                         step="50"
                         value={economics.opexPerYear}
-                        onChange={(e) =>
-                          setEconomics({ ...economics, opexPerYear: Number(e.target.value) })
-                        }
+                        onChange={(e) => {
+                          setOpexIsCustom(true);
+                          setEconomics({ ...economics, opexPerYear: Number(e.target.value) });
+                        }}
                         className={inputClassEco}
                       />
+                      {!opexIsCustom ? (
+                        <p className="mt-1 text-xs text-blue-600">
+                          {t.opexAutoLabel}:{' '}
+                          {(TECH_MANAGEMENT_RATE * 100).toLocaleString('de-DE')} % CAPEX
+                          {' + '}
+                          {calcBillingParticipants(consumption)} × {BILLING_COST_PER_PARTICIPANT} €/Jahr
+                        </p>
+                      ) : (
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="text-xs text-amber-600">{t.opexCustomLabel}</span>
+                          <button
+                            type="button"
+                            onClick={() => setOpexIsCustom(false)}
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            {t.opexResetDefault}
+                          </button>
+                        </div>
+                      )}
                       <button
                         type="button"
-                        onClick={() => setShowOpexModal(true)}
+                        onClick={handleOpenOpexModal}
                         className="mt-1.5 flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 hover:underline"
                       >
                         <List size={12} />
@@ -1859,6 +1975,7 @@ export const Configurator: React.FC = () => {
         cancelLabel={t.breakdownCancel}
         onChangeValue={(key, value) => setCapexBreakdown({ ...capexBreakdown, [key]: value })}
         onApply={(total) => {
+          setCapexIsCustom(true);
           setEconomics({ ...economics, capex: total });
           setShowCapexModal(false);
         }}
@@ -1890,6 +2007,7 @@ export const Configurator: React.FC = () => {
         cancelLabel={t.breakdownCancel}
         onChangeValue={(key, value) => setOpexBreakdown({ ...opexBreakdown, [key]: value })}
         onApply={(total) => {
+          setOpexIsCustom(true);
           setEconomics({ ...economics, opexPerYear: total });
           setShowOpexModal(false);
         }}

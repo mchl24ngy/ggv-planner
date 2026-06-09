@@ -20,6 +20,8 @@ export interface GgvPlannerExportUi {
   expertMode: boolean;
   pvInputMode: 'kwp' | 'sqm';
   roofAreaM2: number;
+  capexIsCustom: boolean;
+  opexIsCustom: boolean;
 }
 
 export interface GgvPlannerExport {

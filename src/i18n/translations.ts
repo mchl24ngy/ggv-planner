@@ -118,8 +118,8 @@ export const translations = {
     sectionModel: 'Betriebsmodell wählen',
     modelMieterstrom: 'Klassischer Mieterstrom',
     modelGGV: 'GGV (Gemeinschaftl. Gebäudeversorgung)',
-    sectionTariffs: 'Stromtarife & Gebühren',
-    sectionFinancing: 'Investition & Finanzierung',
+    sectionTariffs: 'Einnahmen & Stromtarife',
+    sectionFinancing: 'Ausgaben & Finanzierung',
 
     labelTenantRate: 'Netto-Verkaufspreis Mieter (ct)',
     tooltipTenantRate:
@@ -148,10 +148,16 @@ export const translations = {
     labelCapex: 'Investmentkosten CAPEX (€ netto)',
     tooltipCapex:
       'Gesamte Investitionskosten der Anlage (Netto, ohne MwSt.). Inkl. Module, Wechselrichter, Montage, Elektrik und ggf. Speicher.',
+    capexAutoLabel: 'Marktdurchschnitt (automatisch)',
+    capexCustomLabel: 'Manuell angepasst',
+    capexResetDefault: 'Zurücksetzen',
 
     labelOpex: 'Betriebskosten OPEX (€ pro Jahr)',
     tooltipOpex:
       'Jährliche Betriebskosten: Wartung, Versicherung, Zählerabrechnung, Softwaregebühren, etc. Typisch: 1–2% des CAPEX p.a.',
+    opexAutoLabel: 'Marktdurchschnitt (automatisch)',
+    opexCustomLabel: 'Manuell angepasst',
+    opexResetDefault: 'Zurücksetzen',
 
     // Breakdown modal – shared UI
     breakdownOpen: 'Kosten aufschlüsseln',
@@ -449,8 +455,8 @@ export const translations = {
     sectionModel: 'Select Operating Model',
     modelMieterstrom: 'Classic Tenant Electricity',
     modelGGV: 'GGV (Communal Building Supply)',
-    sectionTariffs: 'Tariffs & Fees',
-    sectionFinancing: 'Investment & Financing',
+    sectionTariffs: 'Earnings & Electricity Tariffs',
+    sectionFinancing: 'Costs & Financing',
 
     labelTenantRate: 'Net Tenant Sales Price (ct)',
     tooltipTenantRate:
@@ -479,10 +485,16 @@ export const translations = {
     labelCapex: 'CAPEX (€ net)',
     tooltipCapex:
       'Total investment costs of the system (net, excl. VAT). Including modules, inverters, mounting, electrical work, and storage if applicable.',
+    capexAutoLabel: 'Market average (automatic)',
+    capexCustomLabel: 'Manually set',
+    capexResetDefault: 'Reset to default',
 
     labelOpex: 'OPEX (€/year)',
     tooltipOpex:
       'Annual operating costs: maintenance, insurance, metering, billing, software fees, etc. Typically 1–2% of CAPEX per year.',
+    opexAutoLabel: 'Market average (automatic)',
+    opexCustomLabel: 'Manually set',
+    opexResetDefault: 'Reset to default',
 
     // Breakdown modal – shared UI
     breakdownOpen: 'Break down',
