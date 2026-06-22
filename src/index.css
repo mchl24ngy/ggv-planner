@@ -7,3 +7,17 @@
     @apply bg-slate-50 text-slate-900;
   }
 }
+
+@keyframes attention-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12), 0 0 12px rgba(59, 130, 246, 0.3);
+  }
+}
+
+.field-attention {
+  border-radius: 0.5rem;
+  animation: attention-glow 2s ease-in-out infinite;
+}

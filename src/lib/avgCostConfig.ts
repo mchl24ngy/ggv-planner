@@ -19,7 +19,7 @@ export const BATTERY_COST_TIERS: CostTier[] = [
 
 // OPEX constants — change here to update all auto-calculated defaults
 export const TECH_MANAGEMENT_RATE = 0.01; // 1 % of CAPEX per year
-export const BILLING_COST_PER_PARTICIPANT = 150; // €/year per metered participant
+export const BILLING_COST_PER_PARTICIPANT = 100; // €/year per metered participant
 
 export interface BillingParams {
   apartments: number;

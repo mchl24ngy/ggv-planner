@@ -6,10 +6,13 @@ import { Tooltip } from './Tooltip';
 interface KPIDisplayProps {
   energy: EnergyResults;
   economics: EconomicResults;
+  isConfigured?: boolean;
 }
 
-export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics }) => {
+export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics, isConfigured = true }) => {
   const { t } = useLanguage();
+
+  const placeholder = <span className="text-3xl font-bold text-slate-300">—</span>;
 
   return (
     <div
@@ -21,10 +24,12 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics }) => 
           {t.kpiYield}
           <Tooltip text={t.tooltipKpiYield} />
         </span>
-        <span className="text-3xl font-bold text-blue-800">
-          {(energy.totalYieldKwh / 1000).toFixed(1)}{' '}
-          <span className="text-lg font-normal text-slate-500">MWh/a</span>
-        </span>
+        {isConfigured ? (
+          <span className="text-3xl font-bold text-blue-800">
+            {(energy.totalYieldKwh / 1000).toFixed(1)}{' '}
+            <span className="text-lg font-normal text-slate-500">MWh/a</span>
+          </span>
+        ) : placeholder}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
@@ -32,9 +37,11 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics }) => 
           {t.kpiAutarky}
           <Tooltip text={t.tooltipKpiAutarky} />
         </span>
-        <span className="text-3xl font-bold text-blue-600">
-          {energy.autarkyRate.toFixed(1)} <span className="text-lg font-normal">%</span>
-        </span>
+        {isConfigured ? (
+          <span className="text-3xl font-bold text-blue-600">
+            {energy.autarkyRate.toFixed(1)} <span className="text-lg font-normal">%</span>
+          </span>
+        ) : placeholder}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
@@ -42,9 +49,11 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics }) => 
           {t.kpiSelfConsumption}
           <Tooltip text={t.tooltipKpiSelfConsumption} />
         </span>
-        <span className="text-3xl font-bold text-blue-600">
-          {energy.selfConsumptionRate.toFixed(1)} <span className="text-lg font-normal">%</span>
-        </span>
+        {isConfigured ? (
+          <span className="text-3xl font-bold text-blue-600">
+            {energy.selfConsumptionRate.toFixed(1)} <span className="text-lg font-normal">%</span>
+          </span>
+        ) : placeholder}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
@@ -52,9 +61,11 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics }) => 
           {t.kpiLcoe}
           <Tooltip text={t.tooltipKpiLcoe} />
         </span>
-        <span className="text-3xl font-bold text-emerald-800">
-          {economics.lcoe.toFixed(2)} <span className="text-lg font-normal">ct/kWh</span>
-        </span>
+        {isConfigured ? (
+          <span className="text-3xl font-bold text-emerald-800">
+            {economics.lcoe.toFixed(2)} <span className="text-lg font-normal">ct/kWh</span>
+          </span>
+        ) : placeholder}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
@@ -62,10 +73,12 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics }) => 
           {t.kpiAmortization}
           <Tooltip text={t.tooltipKpiAmortization} />
         </span>
-        <span className="text-3xl font-bold text-emerald-400">
-          {economics.amortizationYears ? economics.amortizationYears : '>20'}{' '}
-          <span className="text-lg font-normal">{t.kpiYears}</span>
-        </span>
+        {isConfigured ? (
+          <span className="text-3xl font-bold text-emerald-400">
+            {economics.amortizationYears ? economics.amortizationYears : '>20'}{' '}
+            <span className="text-lg font-normal">{t.kpiYears}</span>
+          </span>
+        ) : placeholder}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
@@ -73,10 +86,12 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics }) => 
           {t.kpiAccumulatedCashflow}
           <Tooltip text={t.tooltipKpiAccumulatedCashflow} />
         </span>
-        <span className="text-3xl font-bold text-emerald-400">
-          {(economics.accumulatedCashflow / 1000).toFixed(1)}{' '}
-          <span className="text-lg font-normal">T€</span>
-        </span>
+        {isConfigured ? (
+          <span className="text-3xl font-bold text-emerald-400">
+            {(economics.accumulatedCashflow / 1000).toFixed(1)}{' '}
+            <span className="text-lg font-normal">T€</span>
+          </span>
+        ) : placeholder}
       </div>
     </div>
   );

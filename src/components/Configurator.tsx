@@ -71,7 +71,7 @@ export const Configurator: React.FC = () => {
   // State: Inputs
   // Technical system parameters: location (address + coordinates), PV capacity, tilt/azimuth, battery storage
   const [system, setSystem] = useState<SystemParams>({
-    address: 'Berlin, Germany',
+    address: '',
     locationLat: 52.52,
     locationLon: 13.405,
     inclination: 35,
@@ -84,7 +84,7 @@ export const Configurator: React.FC = () => {
 
   // Consumption parameters: number of apartments, participation rate, and optional loads (heat pump, EV charging, common-area electricity)
   const [consumption, setConsumption] = useState<ConsumptionParams>({
-    apartments: 15,
+    apartments: 0,
     participationRate: 0.8,
     consumptionPerApartmentKwh: 1800,
     hasHeatPump: false,
@@ -313,6 +313,8 @@ export const Configurator: React.FC = () => {
 
   // Effect: Recalculate everything when inputs change
   useEffect(() => {
+    if (!isConfigured) return;
+
     const runSimulation = async () => {
       setIsLoading(true);
 
@@ -444,6 +446,8 @@ export const Configurator: React.FC = () => {
     }
   };
 
+  const isConfigured = system.address.trim() !== '' && consumption.apartments > 0;
+
   const inputClass =
     'w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 focus:bg-white transition-colors outline-none focus:border-blue-500';
   const inputClassEco =
@@ -459,7 +463,7 @@ export const Configurator: React.FC = () => {
       />
 
       {/* Header / KPIs */}
-      <KPIDisplay energy={energy} economics={ecoResults} />
+      <KPIDisplay energy={energy} economics={ecoResults} isConfigured={isConfigured} />
 
       {/* Main Content Area */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row min-h-[600px]">
@@ -555,18 +559,22 @@ export const Configurator: React.FC = () => {
                       {t.labelAddress}
                       <Tooltip text={t.tooltipAddress} />
                     </label>
-                    <AddressAutocomplete
-                      defaultValue={system.address}
-                      placeholder={t.placeholderAddress}
-                      onSelect={(address: string, lat: number, lon: number) =>
-                        setSystem((s) => ({ ...s, address, locationLat: lat, locationLon: lon }))
-                      }
-                    />
-                    <p className="text-xs text-slate-500 mt-1">
-                      {t.addressCoords
-                        .replace('{lat}', system.locationLat.toFixed(4))
-                        .replace('{lon}', system.locationLon.toFixed(4))}
-                    </p>
+                    <div className={!system.address ? 'field-attention' : ''}>
+                      <AddressAutocomplete
+                        defaultValue={system.address}
+                        placeholder={t.placeholderAddress}
+                        onSelect={(address: string, lat: number, lon: number) =>
+                          setSystem((s) => ({ ...s, address, locationLat: lat, locationLon: lon }))
+                        }
+                      />
+                    </div>
+                    {system.address && (
+                      <p className="text-xs text-slate-500 mt-1">
+                        {t.addressCoords
+                          .replace('{lat}', system.locationLat.toFixed(4))
+                          .replace('{lon}', system.locationLon.toFixed(4))}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -799,11 +807,12 @@ export const Configurator: React.FC = () => {
                       </label>
                       <input
                         type="number"
-                        value={consumption.apartments}
+                        value={consumption.apartments || ''}
+                        placeholder="z.B. 15"
                         onChange={(e) =>
                           setConsumption({ ...consumption, apartments: Number(e.target.value) })
                         }
-                        className={inputClass}
+                        className={`${inputClass} ${!consumption.apartments ? 'field-attention' : ''}`}
                       />
                     </div>
 
