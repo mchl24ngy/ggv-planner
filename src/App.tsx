@@ -26,7 +26,7 @@ const AppInner = () => {
             {t.openSource}
           </span>
           <a
-            href="https://github.com/michael2avori4energy/ggv-planner/tree/main"
+            href="https://github.com/mchl24ngy/ggv-planner/tree/main"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-slate-500 hover:text-slate-800 transition-colors"
@@ -36,7 +36,7 @@ const AppInner = () => {
           </a>
           <span className="text-slate-300">|</span>
           <a
-            href="https://schaeufler.net/"
+            href="https://immo-pv-planer.de/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-800 transition-colors"
