@@ -162,7 +162,14 @@ export async function exportToPdf(
           : 'No',
     ],
     [isDE ? 'Neigungswinkel' : 'Tilt Angle', `${system.inclination}°`],
-    [isDE ? 'Ausrichtung (Azimut)' : 'Azimuth', `${system.azimuth}°`],
+    [
+      isDE ? 'Ausrichtung (Azimut)' : 'Azimuth',
+      system.mountingType === 'eastWest'
+        ? isDE
+          ? 'Ost-West (50% / 50%)'
+          : 'East-West (50% / 50%)'
+        : `${system.azimuth}°`,
+    ],
     [isDE ? 'Systemverluste' : 'System Losses', `${system.systemLoss} %`],
     [isDE ? 'Wohneinheiten' : 'Apartments', `${consumption.apartments}`],
     [

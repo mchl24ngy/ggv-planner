@@ -26,6 +26,7 @@ const mkSystem = (overrides: Partial<SystemParams> = {}): SystemParams => ({
   locationLon: 11.57,
   inclination: 30,
   azimuth: 0,
+  mountingType: 'south',
   systemLoss: 14,
   pvCapacityKwp: 10,
   hasBattery: false,
@@ -343,13 +344,6 @@ describe('fetchPvgisMonthlyYield', () => {
 
   it('sortiert PVGIS-Monatsdaten nach Monatsnummer', async () => {
     // PVGIS liefert Monate ungeordnet – Implementierung muss sortieren
-    const unsortedMonthly = [
-      { month: 12, E_m: 400 },
-      { month: 1, E_m: 100 },
-      { month: 6, E_m: 900 },
-      ...Array.from({ length: 9 }, (_, i) => ({ month: i + 2, E_m: 200 + i * 50 })),
-    ].slice(0, 12);
-    // Erstelle vollständige 12-Monate-Antwort
     const fullMonthly = Array.from({ length: 12 }, (_, i) => ({ month: i + 1, E_m: (i + 1) * 80 }));
     fullMonthly.sort(() => Math.random() - 0.5); // zufällig mischen
     const mockResponse = { outputs: { monthly: { fixed: fullMonthly } } };
@@ -376,5 +370,34 @@ describe('fetchPvgisMonthlyYield', () => {
     const sum = result.reduce((a, b) => a + b, 0);
     expect(sum).toBeCloseTo(10000, 1); // Fallback
     vi.unstubAllGlobals();
+  });
+
+  describe('Ost-West-Montage', () => {
+    it('stellt zwei Anfragen (Ost -90°, West +90°) mit je halber kWp und summiert die Monatswerte', async () => {
+      const eastMonthly = Array.from({ length: 12 }, (_, i) => ({ month: i + 1, E_m: (i + 1) * 10 }));
+      const westMonthly = Array.from({ length: 12 }, (_, i) => ({ month: i + 1, E_m: (i + 1) * 20 }));
+      const fetchMock = vi
+        .fn()
+        .mockImplementationOnce(async (url: string) => {
+          expect(url).toContain('aspect=-90');
+          expect(url).toContain('peakpower=5');
+          return { json: () => Promise.resolve({ outputs: { monthly: { fixed: eastMonthly } } }) };
+        })
+        .mockImplementationOnce(async (url: string) => {
+          expect(url).toContain('aspect=90');
+          expect(url).toContain('peakpower=5');
+          return { json: () => Promise.resolve({ outputs: { monthly: { fixed: westMonthly } } }) };
+        });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const result = await fetchPvgisMonthlyYield(
+        mkSystem({ pvCapacityKwp: 10, mountingType: 'eastWest' })
+      );
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(result[0]).toBe(30); // Jan: 10 (Ost) + 20 (West)
+      expect(result[11]).toBe(360); // Dez: 120 (Ost) + 240 (West)
+      vi.unstubAllGlobals();
+    });
   });
 });

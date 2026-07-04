@@ -80,6 +80,15 @@ export const translations = {
     azimuthSouth: 'Süd',
     azimuthWest: 'West',
     expertModeDefault: 'Standard: Süd, 35°',
+    azimuthDisabledEastWest: 'Bei Ost-West-Montage nicht relevant (je 50% Ost/West).',
+
+    labelMountingType: 'PV-Modulausrichtung',
+    tooltipMountingType:
+      'Bei der Ost-West-Montage werden 50% der Module nach Osten und 50% nach Westen ausgerichtet, statt alle einheitlich nach Süden. Dadurch verteilt sich der PV-Ertrag gleichmäßiger über den Tag (morgens und abends statt nur mittags) und passt sich so besser an den typischen Verbrauchslastgang von Haushalten an, der morgens und abends am höchsten ist. Der jährliche Gesamtertrag ist meist etwas niedriger als bei optimaler Südausrichtung, dafür steigt tendenziell der Eigenverbrauchsanteil.',
+    mountingTypeSouth: 'Standard: Einseitig',
+    mountingTypeEastWest: 'Geteilt: Ost-West',
+    mountingTypeEastWestHint:
+      'Module hälftig nach Ost und West ausgerichtet – gleichmäßigerer Ertrag über den Tag, passend zum morgendlichen/abendlichen Verbrauch.',
 
     labelBattery: 'Batteriespeicher',
     labelBatteryCapacity: 'kWh',
@@ -425,6 +434,15 @@ export const translations = {
     azimuthSouth: 'South',
     azimuthWest: 'West',
     expertModeDefault: 'Default: South, 35°',
+    azimuthDisabledEastWest: 'Not relevant for East-West mounting (50% East / 50% West each).',
+
+    labelMountingType: 'PV Module Orientation',
+    tooltipMountingType:
+      'With East-West mounting, 50% of the modules face East and 50% face West, instead of all facing South. This spreads PV generation more evenly across the day (morning and evening instead of just midday), matching the typical household consumption pattern, which peaks in the morning and evening. The total annual yield is usually somewhat lower than with an optimal South orientation, but the self-consumption share tends to increase.',
+    mountingTypeSouth: 'South',
+    mountingTypeEastWest: 'East-West',
+    mountingTypeEastWestHint:
+      'Modules split evenly between East and West – more even yield throughout the day, matching morning/evening consumption.',
 
     labelBattery: 'Battery Storage',
     labelBatteryCapacity: 'kWh',

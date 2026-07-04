@@ -9,30 +9,57 @@ import {
 } from '../types';
 
 /**
- * Holt den jährlichen Gesamtertrag aus der PVGIS-API
+ * Holt den jährlichen Ertrag für eine einzelne Ausrichtung (ein PVGIS-Request)
  */
-export async function fetchPvgisYield(system: SystemParams): Promise<number> {
-  const { locationLat, locationLon, pvCapacityKwp, systemLoss, inclination, azimuth } = system;
+async function fetchPvgisYieldForOrientation(
+  system: SystemParams,
+  capacityKwp: number,
+  azimuth: number
+): Promise<number> {
+  const { locationLat, locationLon, systemLoss, inclination } = system;
 
-  if (pvCapacityKwp === 0) return 0;
   if (!locationLat || !locationLon) {
     // Fallback Approximation wenn keine Koordinaten da sind (~1000 kWh/kWp)
-    return pvCapacityKwp * 1000;
+    return capacityKwp * 1000;
   }
 
   try {
     const pvgisBase = import.meta.env.VITE_PVGIS_BASE_URL ?? '/pvgis-api/api/v5_2';
-    const url = `${pvgisBase}/PVcalc?lat=${locationLat}&lon=${locationLon}&peakpower=${pvCapacityKwp}&loss=${systemLoss}&angle=${inclination}&aspect=${azimuth}&outputformat=json`;
+    const url = `${pvgisBase}/PVcalc?lat=${locationLat}&lon=${locationLon}&peakpower=${capacityKwp}&loss=${systemLoss}&angle=${inclination}&aspect=${azimuth}&outputformat=json`;
     const response = await fetch(url);
     const data = await response.json();
 
     // PVGIS v5.2 JSON Response structure: data.outputs.totals.fixed.E_y
     const yearlyYield = data?.outputs?.totals?.fixed?.E_y;
-    return yearlyYield || pvCapacityKwp * 1000; // Fallback falls API keine Daten liefert
+    return yearlyYield || capacityKwp * 1000; // Fallback falls API keine Daten liefert
   } catch (err) {
     console.error('Error fetching PVGIS data:', err);
-    return pvCapacityKwp * 1000;
+    return capacityKwp * 1000;
   }
+}
+
+/**
+ * Holt den jährlichen Gesamtertrag aus der PVGIS-API.
+ *
+ * Bei Ost-West-Montage werden zwei getrennte PVGIS-Anfragen für je 50% der
+ * Anlagenleistung (Ost: Azimut -90°, West: Azimut +90°) gestellt und summiert,
+ * da PVGIS nur eine einheitliche Ausrichtung pro Anfrage unterstützt.
+ */
+export async function fetchPvgisYield(system: SystemParams): Promise<number> {
+  const { pvCapacityKwp } = system;
+
+  if (pvCapacityKwp === 0) return 0;
+
+  if (system.mountingType === 'eastWest') {
+    const halfCapacityKwp = pvCapacityKwp / 2;
+    const [eastYield, westYield] = await Promise.all([
+      fetchPvgisYieldForOrientation(system, halfCapacityKwp, -90),
+      fetchPvgisYieldForOrientation(system, halfCapacityKwp, 90),
+    ]);
+    return eastYield + westYield;
+  }
+
+  return fetchPvgisYieldForOrientation(system, pvCapacityKwp, system.azimuth);
 }
 
 /**

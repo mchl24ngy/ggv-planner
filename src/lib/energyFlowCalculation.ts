@@ -53,7 +53,8 @@ const TYPICAL_MONTHLY_DISTRIBUTION = [
 ];
 
 /**
- * Step 3: Fetches monthly PV yield data from the PVGIS API.
+ * Step 3: Fetches monthly PV yield data from the PVGIS API for a single orientation
+ * (one PVGIS request).
  *
  * The PVGIS endpoint PVcalc returns, in addition to the annual total (E_y),
  * monthly values in outputs.monthly.fixed[] with:
@@ -61,21 +62,21 @@ const TYPICAL_MONTHLY_DISTRIBUTION = [
  *   - E_m:   monthly energy yield in kWh
  *   - E_d:   average daily yield in kWh/day
  *
- * The same API endpoint as fetchPvgisYield is used (no second HTTP request needed),
- * since the PVGIS response always includes monthly data.
- *
- * @param system  System parameters (coordinates, capacity, losses, tilt, azimuth)
- * @returns       Array of 12 monthly yields in kWh [Jan, Feb, …, Dec]
+ * @param system       System parameters (coordinates, losses, tilt)
+ * @param capacityKwp  PV capacity to request for this orientation (kWp)
+ * @param azimuth      Azimuth in degrees for this orientation (0=South, -90=East, 90=West)
+ * @returns            Array of 12 monthly yields in kWh [Jan, Feb, …, Dec]
  */
-export async function fetchPvgisMonthlyYield(system: SystemParams): Promise<number[]> {
-  const { locationLat, locationLon, pvCapacityKwp, systemLoss, inclination, azimuth } = system;
+async function fetchPvgisMonthlyYieldForOrientation(
+  system: SystemParams,
+  capacityKwp: number,
+  azimuth: number
+): Promise<number[]> {
+  const { locationLat, locationLon, systemLoss, inclination } = system;
 
   // Fallback: distribute annual estimate using typical monthly distribution
-  const fallbackAnnual = pvCapacityKwp * 1000;
+  const fallbackAnnual = capacityKwp * 1000;
   const fallback = TYPICAL_MONTHLY_DISTRIBUTION.map((share) => share * fallbackAnnual);
-
-  // If no PV system is present, set all months to 0
-  if (pvCapacityKwp === 0) return new Array(12).fill(0);
 
   // Without coordinates, no location-specific yield can be calculated
   if (!locationLat || !locationLon) return fallback;
@@ -83,12 +84,11 @@ export async function fetchPvgisMonthlyYield(system: SystemParams): Promise<numb
   try {
     const pvgisBase = import.meta.env.VITE_PVGIS_BASE_URL ?? '/pvgis-api/api/v5_2';
 
-    // Same URL as in fetchPvgisYield – the response already contains monthly data
     const url =
       `${pvgisBase}/PVcalc` +
       `?lat=${locationLat}` +
       `&lon=${locationLon}` +
-      `&peakpower=${pvCapacityKwp}` +
+      `&peakpower=${capacityKwp}` +
       `&loss=${systemLoss}` +
       `&angle=${inclination}` +
       `&aspect=${azimuth}` +
@@ -99,8 +99,7 @@ export async function fetchPvgisMonthlyYield(system: SystemParams): Promise<numb
 
     // PVGIS v5.2 response structure: outputs.monthly.fixed is an array of 12 objects
     const monthlyRaw = data?.outputs?.monthly?.fixed as
-      | Array<{ month: number; E_m: number }>
-      | undefined;
+      Array<{ month: number; E_m: number }> | undefined;
 
     // Validation: exactly 12 monthly values must be present
     if (!monthlyRaw || monthlyRaw.length !== 12) return fallback;
@@ -112,6 +111,37 @@ export async function fetchPvgisMonthlyYield(system: SystemParams): Promise<numb
     console.error('Error fetching PVGIS monthly data:', err);
     return fallback;
   }
+}
+
+/**
+ * Step 3: Fetches monthly PV yield data from the PVGIS API.
+ *
+ * The same API endpoint as fetchPvgisYield is used (no second HTTP request needed
+ * per orientation), since the PVGIS response already includes monthly data.
+ *
+ * For East-West mounting, PVGIS only supports one orientation per request, so two
+ * requests are made for 50% of the capacity each (East: azimuth -90°, West: azimuth
+ * +90°) and the monthly results are summed.
+ *
+ * @param system  System parameters (coordinates, capacity, losses, tilt, azimuth, mounting type)
+ * @returns       Array of 12 monthly yields in kWh [Jan, Feb, …, Dec]
+ */
+export async function fetchPvgisMonthlyYield(system: SystemParams): Promise<number[]> {
+  const { pvCapacityKwp } = system;
+
+  // If no PV system is present, set all months to 0
+  if (pvCapacityKwp === 0) return new Array(12).fill(0);
+
+  if (system.mountingType === 'eastWest') {
+    const halfCapacityKwp = pvCapacityKwp / 2;
+    const [eastMonthly, westMonthly] = await Promise.all([
+      fetchPvgisMonthlyYieldForOrientation(system, halfCapacityKwp, -90),
+      fetchPvgisMonthlyYieldForOrientation(system, halfCapacityKwp, 90),
+    ]);
+    return eastMonthly.map((value, index) => value + westMonthly[index]);
+  }
+
+  return fetchPvgisMonthlyYieldForOrientation(system, pvCapacityKwp, system.azimuth);
 }
 
 /**

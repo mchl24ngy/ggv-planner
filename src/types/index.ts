@@ -3,7 +3,8 @@ export interface SystemParams {
   locationLat: number; // Breitengrad (PVGIS)
   locationLon: number; // Längengrad (PVGIS)
   inclination: number; // Neigungswinkel in Grad (0-90)
-  azimuth: number; // Ausrichtung in Grad (0=Süd, -90=Ost, 90=West)
+  azimuth: number; // Ausrichtung in Grad (0=Süd, -90=Ost, 90=West), nur bei mountingType 'south' relevant
+  mountingType: 'south' | 'eastWest'; // Montageart: einheitliche Ausrichtung (azimuth) oder Ost-West-Montage (je 50% Ost/West)
   systemLoss: number; // Systemverluste in % (z.B. 14)
   pvCapacityKwp: number; // PV-Leistung in kWp
   hasBattery: boolean; // Batteriespeicher vorhanden?
