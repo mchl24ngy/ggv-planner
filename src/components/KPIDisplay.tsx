@@ -9,7 +9,11 @@ interface KPIDisplayProps {
   isConfigured?: boolean;
 }
 
-export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics, isConfigured = true }) => {
+export const KPIDisplay: React.FC<KPIDisplayProps> = ({
+  energy,
+  economics,
+  isConfigured = true,
+}) => {
   const { t } = useLanguage();
 
   const placeholder = <span className="text-3xl font-bold text-slate-300">—</span>;
@@ -29,7 +33,9 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics, isCon
             {(energy.totalYieldKwh / 1000).toFixed(1)}{' '}
             <span className="text-lg font-normal text-slate-500">MWh/a</span>
           </span>
-        ) : placeholder}
+        ) : (
+          placeholder
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
@@ -41,7 +47,9 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics, isCon
           <span className="text-3xl font-bold text-blue-600">
             {energy.autarkyRate.toFixed(1)} <span className="text-lg font-normal">%</span>
           </span>
-        ) : placeholder}
+        ) : (
+          placeholder
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
@@ -53,7 +61,9 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics, isCon
           <span className="text-3xl font-bold text-blue-600">
             {energy.selfConsumptionRate.toFixed(1)} <span className="text-lg font-normal">%</span>
           </span>
-        ) : placeholder}
+        ) : (
+          placeholder
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
@@ -65,7 +75,9 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics, isCon
           <span className="text-3xl font-bold text-emerald-800">
             {economics.lcoe.toFixed(2)} <span className="text-lg font-normal">ct/kWh</span>
           </span>
-        ) : placeholder}
+        ) : (
+          placeholder
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
@@ -78,7 +90,9 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics, isCon
             {economics.amortizationYears ? economics.amortizationYears : '>20'}{' '}
             <span className="text-lg font-normal">{t.kpiYears}</span>
           </span>
-        ) : placeholder}
+        ) : (
+          placeholder
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
@@ -91,7 +105,9 @@ export const KPIDisplay: React.FC<KPIDisplayProps> = ({ energy, economics, isCon
             {(economics.accumulatedCashflow / 1000).toFixed(1)}{' '}
             <span className="text-lg font-normal">T€</span>
           </span>
-        ) : placeholder}
+        ) : (
+          placeholder
+        )}
       </div>
     </div>
   );

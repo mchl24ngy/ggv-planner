@@ -76,6 +76,7 @@ export const Configurator: React.FC = () => {
     locationLon: 13.405,
     inclination: 35,
     azimuth: 0,
+    mountingType: 'south',
     systemLoss: 14,
     pvCapacityKwp: 30,
     hasBattery: true,
@@ -706,6 +707,34 @@ export const Configurator: React.FC = () => {
                     )}
                   </div>
 
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="flex items-center text-sm font-medium text-slate-700">
+                        {t.labelMountingType}
+                        <Tooltip text={t.tooltipMountingType} />
+                      </span>
+                      <div className="flex rounded-lg border border-slate-200 overflow-hidden text-xs font-medium">
+                        <button
+                          type="button"
+                          onClick={() => setSystem((s) => ({ ...s, mountingType: 'south' }))}
+                          className={`px-2.5 py-1 transition-colors ${system.mountingType === 'south' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+                        >
+                          {t.mountingTypeSouth}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSystem((s) => ({ ...s, mountingType: 'eastWest' }))}
+                          className={`px-2.5 py-1 transition-colors ${system.mountingType === 'eastWest' ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}
+                        >
+                          {t.mountingTypeEastWest}
+                        </button>
+                      </div>
+                    </div>
+                    {system.mountingType === 'eastWest' && (
+                      <p className="text-xs text-slate-500">{t.mountingTypeEastWestHint}</p>
+                    )}
+                  </div>
+
                   {/* Expert mode toggle */}
                   <div className="pt-1">
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -769,24 +798,34 @@ export const Configurator: React.FC = () => {
                               {t.labelAzimuth}
                               <Tooltip text={t.tooltipAzimuth} />
                             </span>
-                            <span className="text-blue-600 font-semibold">{system.azimuth}°</span>
+                            {system.mountingType === 'south' && (
+                              <span className="text-blue-600 font-semibold">{system.azimuth}°</span>
+                            )}
                           </label>
-                          <input
-                            type="range"
-                            min="-90"
-                            max="90"
-                            step="5"
-                            value={system.azimuth}
-                            onChange={(e) =>
-                              setSystem({ ...system, azimuth: Number(e.target.value) })
-                            }
-                            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                          />
-                          <div className="flex justify-between text-xs text-slate-400 mt-1">
-                            <span>{t.azimuthEast}</span>
-                            <span>{t.azimuthSouth}</span>
-                            <span>{t.azimuthWest}</span>
-                          </div>
+                          {system.mountingType === 'south' ? (
+                            <>
+                              <input
+                                type="range"
+                                min="-90"
+                                max="90"
+                                step="5"
+                                value={system.azimuth}
+                                onChange={(e) =>
+                                  setSystem({ ...system, azimuth: Number(e.target.value) })
+                                }
+                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                              />
+                              <div className="flex justify-between text-xs text-slate-400 mt-1">
+                                <span>{t.azimuthEast}</span>
+                                <span>{t.azimuthSouth}</span>
+                                <span>{t.azimuthWest}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <p className="text-xs text-slate-400 mt-1">
+                              {t.azimuthDisabledEastWest}
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}

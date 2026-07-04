@@ -22,6 +22,7 @@ const mkSystem = (overrides: Partial<SystemParams> = {}): SystemParams => ({
   locationLon: 11.57,
   inclination: 30,
   azimuth: 0,
+  mountingType: 'south',
   systemLoss: 14,
   pvCapacityKwp: 10,
   hasBattery: false,
@@ -689,5 +690,29 @@ describe('fetchPvgisYield', () => {
     const result = await fetchPvgisYield(mkSystem({ pvCapacityKwp: 5 }));
     expect(result).toBe(5000); // Fallback
     vi.unstubAllGlobals();
+  });
+
+  describe('Ost-West-Montage', () => {
+    it('stellt zwei Anfragen (Ost -90°, West +90°) mit je halber kWp und summiert die Erträge', async () => {
+      const fetchMock = vi
+        .fn()
+        .mockImplementationOnce(async (url: string) => {
+          expect(url).toContain('aspect=-90');
+          expect(url).toContain('peakpower=5');
+          return { json: () => Promise.resolve({ outputs: { totals: { fixed: { E_y: 4000 } } } }) };
+        })
+        .mockImplementationOnce(async (url: string) => {
+          expect(url).toContain('aspect=90');
+          expect(url).toContain('peakpower=5');
+          return { json: () => Promise.resolve({ outputs: { totals: { fixed: { E_y: 4500 } } } }) };
+        });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const result = await fetchPvgisYield(mkSystem({ pvCapacityKwp: 10, mountingType: 'eastWest' }));
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(result).toBe(8500);
+      vi.unstubAllGlobals();
+    });
   });
 });
